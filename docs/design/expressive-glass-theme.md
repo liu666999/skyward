@@ -1,5 +1,9 @@
 # Skyward Expressive Glass Theme
 
+## Author
+
+**是雅而非哑**
+
 ## Goal
 
 Add an optional theme that combines the design language of Material 3 Expressive
@@ -88,6 +92,11 @@ not copy Compose-dependent implementation wholesale. If source code is copied
 or adapted, retain its copyright and Apache-2.0 notices in the relevant files
 and document the adaptation. Keep the resulting Skyward changes compatible
 with the repository's GPL-3.0-or-later distribution.
+
+## Implementation notes
+
+- `theme.rs` now exposes `Theme::expressive(w, h, px_per_dp, dark)`, adapting M3E semantic roles into the existing Skyward palette consumed by current widgets. Geometry, touch targets, battery inks and recovery actions remain inherited from the stock theme.
+- This is a first palette adapter, not yet a selectable persisted theme. Glass material parameters are still separate from the renderer; backdrop sampling, clipped blur, and page/component wiring remain outstanding.
 
 ## Current status
 
