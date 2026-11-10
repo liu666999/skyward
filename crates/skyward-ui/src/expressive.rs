@@ -321,6 +321,13 @@ mod tests {
         for colors in [ColorScheme::light(), ColorScheme::dark()] {
             assert!(contrast(colors.on_surface, colors.surface) >= 7.0);
             assert!(contrast(colors.on_surface, colors.surface_container_highest) >= 4.5);
+            // Search and ordinary text fields use surface-container-high;
+            // keyboard letter keys use the lowest container.
+            assert!(contrast(colors.on_surface, colors.surface_container_high) >= 4.5);
+            assert!(contrast(colors.on_surface, colors.surface_container_lowest) >= 4.5);
+            assert!(contrast(colors.on_surface_variant, colors.surface_container_high) >= 4.5);
+            // The blinking search cursor is primary on the search field.
+            assert!(contrast(colors.primary, colors.surface_container_high) >= 4.5);
             assert!(contrast(colors.on_primary, colors.primary) >= 4.5);
             assert!(contrast(colors.on_primary_container, colors.primary_container) >= 4.5);
             // Selected popup text uses primary over the high surface container.
