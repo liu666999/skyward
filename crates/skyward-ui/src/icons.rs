@@ -1,5 +1,5 @@
 //! The icons the pages draw, as the stock Settings draws its own: a tile in
-//! one colour whose corners ease into its sides, and a white glyph over it
+//! one semantic container colour whose corners ease into its sides, and a matching glyph over it
 //! whose details are cut out of filled shapes. Each is an outline in the
 //! stock icons' 28-unit box, written as SVG path data. Where the stock
 //! Settings has an icon for the same thing, its glyph is the stock one;
