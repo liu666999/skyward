@@ -3306,6 +3306,12 @@ pub fn rename(cx: &Ctx) -> Frame {
     Frame { caret: Some(caret), ..Frame::new(t, c, out, l.pick(RENAME), top) }
 }
 
+/// The tint for a destructive name-clash choice. Only M3E adds the
+/// semantic error role; stock keeps the original unaccented row.
+fn clash_replace_tint(t: &Theme) -> Option<Rgba> {
+    t.typography.map(|_| t.pal.danger)
+}
+
 /// The folder an entry goes to already holds its name: what to do.
 pub fn clash(cx: &Ctx) -> Frame {
     let (t, f, s, l) = (cx.t, cx.f, cx.state, cx.state.lang);
@@ -3320,8 +3326,13 @@ pub fn clash(cx: &Ctx) -> Frame {
     let there = tr!(l, "\"{into}\"中已有同名的\"{name}\"。", "「{into}」中已有同名的「{name}」。", "“{into}” already holds an entry named “{name}”.");
     let y = widgets::paragraph(&mut c, t, f, top, &there);
     let skip = tr!(l, "保留已有的同名项，不{verb}该项", "保留已有的同名項目，不{verb}這個項目", "Keeps the entry there, and doesn't {verb} this one");
+    // Replacing overwrites an existing entry. Give it the error role in
+    // M3E, while leaving the stock choice list visually unchanged.
+    let replace = Row::new(l.pick(["替换", "取代", "Replace"]))
+        .subtitle(l.pick(["覆盖已有的同名项", "覆寫已有的同名項目", "Writes over the entry there"]));
+    let replace = clash_replace_tint(t).map_or(replace, |ink| replace.tint(ink));
     let choices = widgets::list(&mut c, t, f, y + t.m.dp(12.0), &[
-        Row::new(l.pick(["替换", "取代", "Replace"])).subtitle(l.pick(["覆盖已有的同名项", "覆寫已有的同名項目", "Writes over the entry there"])),
+        replace,
         Row::new(l.pick(["跳过", "略過", "Skip"])).subtitle(&skip),
         Row::new(l.pick(["保留两者", "保留兩者", "Keep both"])).subtitle(l.pick(["自动为该项重新命名", "自動為這個項目重新命名", "Gives this one a new name"])),
     ]);
@@ -4009,6 +4020,16 @@ mod tests {
 
     fn at(item: usize, done: u64, of: u64, checking: bool) -> BackupAt {
         BackupAt { item, done, of, checking }
+    }
+
+    #[test]
+    fn replace_choice_uses_m3_error_role_without_changing_stock() {
+        let light = Theme::expressive(1440, 3200, 3.5, false);
+        let dark = Theme::expressive(1440, 3200, 3.5, true);
+        assert_eq!(clash_replace_tint(&light), Some(light.pal.danger));
+        assert_eq!(clash_replace_tint(&dark), Some(dark.pal.danger));
+        assert_eq!(clash_replace_tint(&Theme::light(1440, 3200, 3.5)), None);
+        assert_eq!(clash_replace_tint(&Theme::dark(1440, 3200, 3.5)), None);
     }
 
     #[test]
