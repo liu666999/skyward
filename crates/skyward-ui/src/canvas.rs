@@ -1005,6 +1005,11 @@ impl Canvas {
     }
 
     pub fn text_width(&self, face: &Face, text: &str, px: f32) -> f32 {
+        self.text_width_spaced(face, text, px, 0.0)
+    }
+
+    /// Measure text with an additional advance between adjacent glyphs.
+    pub fn text_width_spaced(&self, face: &Face, text: &str, px: f32, spacing: f32) -> f32 {
         let scale = face.scale(px);
         let sf = face.font.as_scaled(scale);
         let mut w = 0.0;
@@ -1012,7 +1017,7 @@ impl Canvas {
         for ch in text.chars() {
             let (id, advance) = face.glyph(ch, scale);
             if let Some(p) = prev {
-                w += sf.kern(p, id);
+                w += sf.kern(p, id) + spacing;
             }
             w += advance;
             prev = Some(id);
@@ -1032,7 +1037,23 @@ impl Canvas {
         color: Rgba,
         max_w: Option<f32>,
     ) -> f32 {
-        self.text_with(face, text, x, baseline, px, Ink::Solid(color), max_w)
+        self.text_with(face, text, x, baseline, px, Ink::Solid(color), max_w, 0.0)
+    }
+
+    /// Draw text with an additional advance between adjacent glyphs.
+    /// Measurement and truncation use the same spacing as the glyph positions.
+    pub fn text_spaced(
+        &mut self,
+        face: &Face,
+        text: &str,
+        x: f32,
+        baseline: f32,
+        px: f32,
+        color: Rgba,
+        max_w: Option<f32>,
+        spacing: f32,
+    ) -> f32 {
+        self.text_with(face, text, x, baseline, px, Ink::Solid(color), max_w, spacing)
     }
 
     /// [`Canvas::text`] with the ink colour chosen per pixel, for gradient
@@ -1047,10 +1068,10 @@ impl Canvas {
         paint: &dyn Fn(f32, f32) -> Rgba,
         max_w: Option<f32>,
     ) -> f32 {
-        self.text_with(face, text, x, baseline, px, Ink::Paint(paint), max_w)
+        self.text_with(face, text, x, baseline, px, Ink::Paint(paint), max_w, 0.0)
     }
 
-    fn text_with(&mut self, face: &Face, text: &str, x: f32, baseline: f32, px: f32, ink: Ink, max_w: Option<f32>) -> f32 {
+    fn text_with(&mut self, face: &Face, text: &str, x: f32, baseline: f32, px: f32, ink: Ink, max_w: Option<f32>, spacing: f32) -> f32 {
         let scale = face.scale(px);
         let sf = face.font.as_scaled(scale);
         let (ell, ell_w) = face.glyph('…', scale);
@@ -1061,11 +1082,11 @@ impl Canvas {
         for (i, &ch) in chars.iter().enumerate() {
             let (id, aw) = face.glyph(ch, scale);
             if let Some(p) = prev {
-                pen += sf.kern(p, id);
+                pen += sf.kern(p, id) + spacing;
             }
             if let Some(lim) = limit {
                 let more = i + 1 < chars.len();
-                if pen + aw + if more { ell_w } else { 0.0 } > lim {
+                if pen + aw + if more { spacing + ell_w } else { 0.0 } > lim {
                     self.glyph(face, ell, scale, pen, baseline, ink);
                     pen += ell_w;
                     break;
@@ -1271,6 +1292,16 @@ fn rr_sdf(px: f32, py: f32, cx: f32, cy: f32, hx: f32, hy: f32, r: f32) -> f32 {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn spaced_text_measurement_matches_the_added_glyph_advances() {
+        let f = crate::font::bundled();
+        let c = Canvas::new(400, 100);
+        let plain = c.text_width(&f.heading, "M3E", 18.0);
+        let spaced = c.text_width_spaced(&f.heading, "M3E", 18.0, 0.5);
+        assert!((spaced - plain - 1.0).abs() < 0.01);
+        assert_eq!(c.text_width_spaced(&f.heading, "M3E", 18.0, 0.0), plain);
+    }
+
     use super::*;
 
     #[test]
