@@ -1170,9 +1170,8 @@ pub enum Action {
     /// Try opening the data partition again, after it did not open.
     OpenData,
     Back,
-    Theme { dark: bool },
-    /// Choose the Material 3 Expressive palette while retaining the light/dark choice.
-    Expressive(bool),
+    /// Choose one complete visual preset: palette family and brightness together.
+    Theme { dark: bool, expressive: bool },
     Toggle(Switch),
     RebootTarget(usize),
     /// Choose or leave out what the wipe page erases.
@@ -5155,14 +5154,9 @@ impl App {
                 self.refresh();
             }
             Action::Back | Action::CloseSearch => return self.back(now),
-            Action::Theme { dark } => {
-                if self.state.dark != dark {
+            Action::Theme { dark, expressive } => {
+                if self.state.dark != dark || self.state.expressive != expressive {
                     self.state.dark = dark;
-                    self.refresh();
-                }
-            }
-            Action::Expressive(expressive) => {
-                if self.state.expressive != expressive {
                     self.state.expressive = expressive;
                     self.refresh();
                 }
