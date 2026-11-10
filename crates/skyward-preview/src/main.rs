@@ -1023,11 +1023,13 @@ fn main() -> Result<()> {
         }),
     ];
     for (name, screen, dark, set) in pages {
-        // Search fields are a focused M3E text-field preview. Keep every
-        // existing stock filename stable and emit a parallel expressive
-        // image only for these fixtures, rather than multiplying all 178
-        // long-page screenshots in CI.
-        let expressive_variants: &[bool] = if screen == Screen::Search {
+        // Search and file-navigation pages receive focused M3E previews:
+        // they cover the text field, path capsules, file rows and empty/error
+        // states without multiplying every long-page fixture in CI.
+        let expressive_variants: &[bool] = if screen == Screen::Search
+            || screen == Screen::Files
+            || matches!(screen, Screen::Choose(_))
+        {
             &[false, true]
         } else {
             &[false]
