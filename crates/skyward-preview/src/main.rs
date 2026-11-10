@@ -1028,6 +1028,14 @@ fn main() -> Result<()> {
         // Stock previews remain generated for every fixture.
         let expressive_variants: &[bool] = if screen == Screen::Search
             || screen == Screen::Files
+            || screen == Screen::Permissions
+            || screen == Screen::Mount
+            || screen == Screen::Wlan
+            || screen == Screen::WlanPassword
+            || screen == Screen::WlanNetwork
+            || screen == Screen::WlanAdd
+            || screen == Screen::Filesystems
+            || screen == Screen::Filesystem
             || screen == Screen::Wipe
             || screen == Screen::RestoreBackup
             || screen == Screen::Clash
