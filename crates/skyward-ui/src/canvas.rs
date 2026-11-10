@@ -883,6 +883,87 @@ impl Canvas {
         }
     }
 
+    /// Draw a bounded liquid-glass rounded panel over an already-rendered backdrop.
+    /// Only the panel plus its blur margin is sampled; the full screen is never blurred.
+    pub fn glass_round_rect(
+        &mut self,
+        backdrop: &Canvas,
+        x: f32,
+        y: f32,
+        w: f32,
+        h: f32,
+        radius: f32,
+        material: crate::glass::GlassMaterial,
+    ) {
+        assert!(self.whole() && backdrop.whole(), "glass panels need complete backdrop canvases");
+        assert_eq!((self.w, self.h), (backdrop.w, backdrop.h), "glass backdrop and target sizes match");
+        if w <= 0.0 || h <= 0.0 { return; }
+        let blur = material.blur_radius.ceil().clamp(0.0, 24.0) as i32;
+        let x0 = (x.floor() as i32 - blur).clamp(0, self.w as i32);
+        let y0 = (y.floor() as i32 - blur).clamp(0, self.h as i32);
+        let x1 = ((x + w).ceil() as i32 + blur).clamp(x0, self.w as i32);
+        let y1 = ((y + h).ceil() as i32 + blur).clamp(y0, self.h as i32);
+        let rw = (x1 - x0) as usize;
+        let rh = (y1 - y0) as usize;
+        if rw == 0 || rh == 0 { return; }
+
+        // Two separable box passes, restricted to this panel's padded bounds.
+        let mut horizontal = vec![[0u8; 3]; rw * rh];
+        let mut blurred = vec![[0u8; 3]; rw * rh];
+        for yy in 0..rh {
+            for xx in 0..rw {
+                let mut sum = [0u32; 3];
+                let mut count = 0u32;
+                let lo = xx.saturating_sub(blur as usize);
+                let hi = (xx + blur as usize + 1).min(rw);
+                for sx in lo..hi {
+                    let i = (((y0 as usize + yy) * backdrop.w as usize + x0 as usize + sx) * 4) as usize;
+                    for k in 0..3 { sum[k] += backdrop.data[i + k] as u32; }
+                    count += 1;
+                }
+                horizontal[yy * rw + xx] = [(sum[0] / count) as u8, (sum[1] / count) as u8, (sum[2] / count) as u8];
+            }
+        }
+        for yy in 0..rh {
+            for xx in 0..rw {
+                let mut sum = [0u32; 3];
+                let mut count = 0u32;
+                let lo = yy.saturating_sub(blur as usize);
+                let hi = (yy + blur as usize + 1).min(rh);
+                for sy in lo..hi {
+                    let p = horizontal[sy * rw + xx];
+                    for k in 0..3 { sum[k] += p[k] as u32; }
+                    count += 1;
+                }
+                blurred[yy * rw + xx] = [(sum[0] / count) as u8, (sum[1] / count) as u8, (sum[2] / count) as u8];
+            }
+        }
+
+        let edge = material.edge_width_px.max(0.5);
+        let cx = x + w / 2.0;
+        let cy = y + h / 2.0;
+        for yy in 0..rh {
+            let py = y0 + yy as i32;
+            for xx in 0..rw {
+                let px = x0 + xx as i32;
+                let sdf = rr_sdf(px as f32 + 0.5, py as f32 + 0.5, cx, cy, w / 2.0, h / 2.0, radius.min(w.min(h) / 2.0));
+                let coverage = (0.5 - sdf).clamp(0.0, 1.0);
+                if coverage <= 0.0 { continue; }
+                let i = ((py as usize * self.w as usize + px as usize) * 4) as usize;
+                let sample = blurred[yy * rw + xx];
+                let mut pixel = [sample[0], sample[1], sample[2], 255];
+                blend_over(&mut pixel, material.tint, 1.0);
+                let edge_distance = sdf.abs();
+                if edge_distance <= edge {
+                    let top_bias = ((cy - (py as f32 + 0.5)) / (h / 2.0).max(1.0) * 0.5 + 0.5).clamp(0.0, 1.0);
+                    let highlight = material.edge_highlight.with_alpha((material.edge_highlight.a as f32 * top_bias * (1.0 - edge_distance / edge)).round() as u8);
+                    blend_over(&mut pixel, highlight, 1.0);
+                }
+                blend_over(&mut self.data[i..i + 4], Rgba { r: pixel[0], g: pixel[1], b: pixel[2], a: 255 }, coverage);
+            }
+        }
+    }
+
     /// Antialiased fill of a convex polygon (points in either winding).
     pub fn fill_convex(&mut self, pts: &[(f32, f32)], color: Rgba) {
         if pts.len() < 3 {
