@@ -356,7 +356,14 @@ pub fn settings(cx: &Ctx) -> Frame {
     let theme_top = widgets::section_first(&mut c, t, f, top, l.pick(["主题", "主題", "Theme"]));
     let themes = widgets::theme_picker(&mut c, t, f, l, theme_top + t.m.dp(8.9), s.expressive);
     out.extend(hits(&themes.rows, &[Action::Theme { dark: false, expressive: false }, Action::Theme { dark: true, expressive: false }, Action::Theme { dark: false, expressive: true }, Action::Theme { dark: true, expressive: true }]));
-    let mut y = widgets::section(&mut c, t, f, themes.bottom, l.pick(["亮度", "亮度", "Brightness"]));
+    let glass_top = widgets::section(&mut c, t, f, themes.bottom, l.pick(["液态玻璃", "液態玻璃", "Liquid Glass"]));
+    let glass = widgets::list(&mut c, t, f, glass_top, &[
+        Row::new(l.pick(["设备信息卡片使用玻璃材质", "裝置資訊卡片使用玻璃材質", "Use glass on the device card"]))
+            .subtitle(l.pick(["独立于原生主题和 M3E，可随时关闭", "獨立於原生主題和 M3E，可隨時關閉", "Independent of stock and M3E themes; can be turned off"]))
+            .trail(Trail::Switch(s.liquid_glass)),
+    ]);
+    out.extend(hits(&glass.rows, &[Action::Toggle(Switch::LiquidGlass)]));
+    let mut y = widgets::section(&mut c, t, f, glass.bottom, l.pick(["亮度", "亮度", "Brightness"]));
     let off = fmt::screen_off(l, SCREEN_OFF[s.screen_off]);
     let below = Row::new(l.pick(SCREEN_TIMEOUT)).trail(Trail::Value(&off));
     let slider = widgets::slider_card(&mut c, t, f, y, Caption::Sun, l.pick(["屏幕亮度", "螢幕亮度", "Screen brightness"]), s.brightness, Some(below));
