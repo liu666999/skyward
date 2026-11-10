@@ -3158,6 +3158,23 @@ mod tests {
     }
 
     #[test]
+    fn expressive_choice_popup_uses_surface_roles_and_tints_only_the_held_row() {
+        for dark in [false, true] {
+            let t = Theme::expressive(1200, 2608, 3.0, dark);
+            let f = crate::font::bundled();
+            let mut c = Canvas::filled(1200, 2608, t.pal.bg);
+            let row = Rect::new(36.0, 621.0, 1128.0, 176.0);
+            let picks = choices(&mut c, &t, &f, row, &["无", "WPA/WPA2-Personal", "WPA3-Personal"], Some(0), Some(1));
+            let centre = |r: Rect| (r.x + 44.0, r.y + r.h / 2.0);
+            let (sx, sy) = centre(picks[0]);
+            let (hx, hy) = centre(picks[1]);
+            assert_eq!(pixel(&(c.clone(), 0, 0), sx, sy), [t.pal.popup.r, t.pal.popup.g, t.pal.popup.b, t.pal.popup.a]);
+            let held = over(t.pal.row_press, t.pal.popup);
+            assert_eq!(pixel(&(c, 0, 0), hx, hy), [held.r, held.g, held.b, held.a]);
+        }
+    }
+
+    #[test]
     fn the_bars_round_button_mirrors_the_back_control_and_centres_its_glyph() {
         let t = Theme::light(1440, 3200, 3.5);
         let (back, button) = (back_rect(&t), button_rect(&t));
