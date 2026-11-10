@@ -49,6 +49,8 @@ pub struct Palette {
     pub warning_ink: Rgba,
     /// Foreground ink for successful status accents.
     pub success_ink: Rgba,
+    /// Foreground ink for tertiary status accents.
+    pub tertiary_ink: Rgba,
     /// Titles and values on the parameters page and captions inside cards, a
     /// step softer than `text`.
     pub info: Rgba,
@@ -216,6 +218,7 @@ impl Theme {
             danger_soft_ink: c.on_error_container,
             warning_ink: c.on_warning_container,
             success_ink: c.on_success_container,
+            tertiary_ink: c.tertiary,
             inverse_surface: c.inverse_surface,
             inverse_text: c.inverse_on_surface,
             backdrop: c.surface_container_high,
@@ -394,6 +397,7 @@ const LIGHT: Palette = Palette {
     danger_soft_ink: Rgba::rgb(230, 66, 60),
     warning_ink: Rgba::rgb(255, 255, 255),
     success_ink: Rgba::rgb(255, 255, 255),
+    tertiary_ink: Rgba::rgb(255, 255, 255),
     info: Rgba::rgb(51, 51, 51),
     outline: Rgba::rgb(102, 102, 102),
     spec_label: Rgba::rgb(127, 127, 127),
@@ -463,6 +467,7 @@ const DARK: Palette = Palette {
     danger_soft_ink: Rgba::rgb(255, 92, 84),
     warning_ink: Rgba::rgb(255, 255, 255),
     success_ink: Rgba::rgb(255, 255, 255),
+    tertiary_ink: Rgba::rgb(255, 255, 255),
     info: Rgba::rgb(214, 214, 214),
     outline: Rgba::rgb(140, 140, 140),
     spec_label: Rgba::rgb(128, 128, 128),
@@ -515,6 +520,7 @@ mod tests {
             assert_eq!(theme.pal.danger_soft_ink, colors.on_error_container);
             assert_eq!(theme.pal.warning_ink, colors.on_warning_container);
             assert_eq!(theme.pal.success_ink, colors.on_success_container);
+            assert_eq!(theme.pal.tertiary_ink, colors.tertiary);
             assert_eq!(theme.pal.on_danger, colors.on_error);
             assert_eq!(theme.pal.backdrop_ink, colors.on_surface);
             assert_eq!(theme.pal.inverse_surface, colors.inverse_surface);
@@ -539,10 +545,12 @@ mod tests {
         assert_eq!(light.danger_soft_ink, Rgba::rgb(230, 66, 60));
         assert_eq!(light.warning_ink, Rgba::rgb(255, 255, 255));
         assert_eq!(light.success_ink, Rgba::rgb(255, 255, 255));
+        assert_eq!(light.tertiary_ink, Rgba::rgb(255, 255, 255));
         assert_eq!(dark.badge_ink, Rgba::rgb(84, 136, 248));
         assert_eq!(dark.danger_soft_ink, Rgba::rgb(255, 92, 84));
         assert_eq!(dark.warning_ink, Rgba::rgb(255, 255, 255));
         assert_eq!(dark.success_ink, Rgba::rgb(255, 255, 255));
+        assert_eq!(dark.tertiary_ink, Rgba::rgb(255, 255, 255));
         assert_eq!(light.on_danger, Rgba::rgb(255, 255, 255));
         assert_eq!(light.inverse_surface, Rgba::rgb(30, 30, 30).with_alpha(235));
         assert_eq!(dark.inverse_surface, Rgba::rgb(30, 30, 30).with_alpha(235));
