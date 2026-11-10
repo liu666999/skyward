@@ -2273,7 +2273,12 @@ pub fn spec_card(c: &mut Canvas, t: &Theme, f: &Fonts, top: f32, title: &str, it
     let (card_x, right) = (m.margin, m.w as f32 - m.margin);
     let x = card_x + m.inner;
     let room = right - m.inner - x;
-    let title_px = m.dp(24.0);
+    // Keep the stock measurements intact while assigning the hardware
+    // card's title, value and caption to explicit M3 type roles.
+    let type_scale = t.typography;
+    let title_px = m.dp(type_scale.map_or(24.0, |scale| scale.headline_small.size_sp));
+    let value_px = m.dp(type_scale.map_or(14.1, |scale| scale.title_small.size_sp));
+    let caption_px = m.dp(type_scale.map_or(11.0, |scale| scale.label_small.size_sp));
     let lines: Vec<String> = title.split('\n').flat_map(|l| wrap(c, &f.heading, l, title_px, room)).collect();
     let first_title = top + m.dp(23.0) + f.heading.cap(title_px);
     let title_pitch = m.dp(33.0);
@@ -2287,8 +2292,8 @@ pub fn spec_card(c: &mut Canvas, t: &Theme, f: &Fonts, top: f32, title: &str, it
     }
     for (i, (caption, value)) in items.iter().enumerate() {
         let base = first + pitch * i as f32;
-        c.text(&f.heading, value, x, base, m.dp(14.1), tone.text, Some(room));
-        c.text(&f.body, caption, x, base + drop, m.dp(11.0), tone.caption, None);
+        c.text(&f.heading, value, x, base, value_px, tone.text, Some(room));
+        c.text(&f.body, caption, x, base + drop, caption_px, tone.caption, None);
     }
     bottom
 }
