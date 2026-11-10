@@ -176,16 +176,18 @@ pub struct Theme {
     /// Present only when the M3 Expressive motion scheme is selected.
     pub motion: Option<MotionScheme>,
     pub dark: bool,
+    /// Opt-in Liquid Glass rendering for selected decorative surfaces.
+    pub liquid_glass: bool,
 }
 
 impl Theme {
     /// `px_per_dp` is the panel density over 160, e.g. 3.0 at 480 dpi.
     pub fn light(w: u32, h: u32, px_per_dp: f32) -> Self {
-        Theme { pal: LIGHT, hero: LIGHT_HERO, m: metrics(w, h, px_per_dp), shapes: ShapeScale::STOCK, typography: None, motion: None, dark: false }
+        Theme { pal: LIGHT, hero: LIGHT_HERO, m: metrics(w, h, px_per_dp), shapes: ShapeScale::STOCK, typography: None, motion: None, dark: false, liquid_glass: false }
     }
 
     pub fn dark(w: u32, h: u32, px_per_dp: f32) -> Self {
-        Theme { pal: DARK, hero: DARK_HERO, m: metrics(w, h, px_per_dp), shapes: ShapeScale::STOCK, typography: None, motion: None, dark: true }
+        Theme { pal: DARK, hero: DARK_HERO, m: metrics(w, h, px_per_dp), shapes: ShapeScale::STOCK, typography: None, motion: None, dark: true, liquid_glass: false }
     }
 
     /// Material 3 Expressive palette adapted to Skyward's existing widgets.
