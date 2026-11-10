@@ -1687,7 +1687,14 @@ pub fn device_card(c: &mut Canvas, t: &Theme, f: &Fonts, top: f32, title: &str, 
     let lays: Vec<Layout> = rows.iter().map(|r| layout(c, t, f, r)).collect();
     let h = m.account_row_h + lays.iter().map(|l| l.h).sum::<f32>();
     let (card_x, right) = (m.margin, m.w as f32 - m.margin);
-    c.fill_round_rect(card_x, top, right - card_x, h, m.card_radius, t.pal.card);
+    if t.liquid_glass {
+        let backdrop = c.clone();
+        let material = crate::glass::material(crate::glass::GlassLevel::Standard, t.dark, m.px_per_dp)
+            .expect("the selected glass level has a material");
+        c.glass_round_rect(&backdrop, card_x, top, right - card_x, h, m.card_radius, material);
+    } else {
+        c.fill_round_rect(card_x, top, right - card_x, h, m.card_radius, t.pal.card);
+    }
 
     let cy = top + m.account_row_h / 2.0;
     let av = m.avatar;
