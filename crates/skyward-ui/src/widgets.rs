@@ -3145,7 +3145,7 @@ mod tests {
         let f = crate::font::bundled();
         let c = Canvas::new(1, 1);
         let px = 18.0;
-        let text = "M3 expressive";
+        let text = "M3Expressive";
         let plain = wrap(&c, &f.body, text, px, 85.0);
         let spaced = wrap_spaced(&c, &f.body, text, px, 85.0, 0.5);
         assert!(spaced.len() >= plain.len());
