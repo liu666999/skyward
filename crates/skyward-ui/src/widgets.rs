@@ -2742,7 +2742,7 @@ pub fn theme_picker(c: &mut Canvas, t: &Theme, f: &Fonts, l: Lang, top: f32, exp
     let slot_w = (m.w as f32 - m.margin * 2.0 - gap) / 2.0;
     let inset = m.dp(6.0);
     let tile = slot_w - inset * 2.0;
-    let label_px = m.dp(13.5);
+    let label_px = m.dp(t.typography.map_or(13.5, |scale| scale.label_medium.size_sp));
     let (ink_top, ink_bottom) = f.heading.ink(label_px);
     let row_pitch = slot_w + m.dp(8.0);
     let caption_offset = slot_w + m.dp(9.0) - ink_top;
