@@ -590,6 +590,10 @@ fn main() -> Result<()> {
             app.term_started(rows, cols);
             app.term_output(SHELL_SAMPLE);
             app.state.layer = Layer::Symbols;
+            // Leave Ctrl held so the preview exercises its selected-key
+            // foreground, not just the ordinary shortcut row.
+            finger_on(app, &fonts, &info, Action::TermKey(TermKey::Ctrl), 100);
+            app.touch(Touch::Up, &fonts, 160);
         }),
         ("124-editor-light", Screen::Files, false, &|app| {
             app.text_opened(&fonts, "/data/adb/service.d/tune.sh".into(), Ok(Some(EDITOR_SAMPLE.into())), 0);
