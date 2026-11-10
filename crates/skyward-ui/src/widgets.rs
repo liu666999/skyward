@@ -890,7 +890,7 @@ pub fn back_chip(t: &Theme) -> (Canvas, i32, i32) {
 /// Such a chip about the disc centred at (`cx`, `cy`) of radius `r`.
 fn chip(t: &Theme, (cx, cy, r): (f32, f32, f32)) -> (Canvas, i32, i32) {
     let m = &t.m;
-    let (fill, rim) = (t.pal.card, t.pal.rim);
+    let (fill, rim) = (t.pal.chip_fill, t.pal.chip_rim);
     let spread = m.dp(7.0);
     let reach = r + spread;
     let (x0, y0) = ((cx - reach).floor() as i32 - 1, (cy - reach).floor() as i32 - 1);
