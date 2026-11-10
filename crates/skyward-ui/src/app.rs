@@ -4632,7 +4632,7 @@ impl App {
                 body.put_rows(&frame.canvas, top, keys_top, 0);
                 (body, top)
             });
-            let (delay, span) = MORPH_BODY_MS;
+            let (delay, span) = t.motion.map_or(MORPH_BODY_MS, |m| (m.medium, m.short));
             out.lay(body, 0, *top, (now.saturating_sub(morph.start + delay) as f32 / span as f32).min(1.0));
         } else {
             // The home page under its bar comes down with it.
