@@ -63,6 +63,9 @@ jobs:
           test -s target/theme-preview/41-search-light-m3e.png
           test -s target/theme-preview/42-search-light-found-m3e.png
           test -s target/theme-preview/43-search-dark-pinyin-m3e.png
+          # Terminal previews cover the M3E key row, held Ctrl foreground and on-screen keyboard.
+          test -s target/theme-preview/53-terminal-light-m3e.png
+          test -s target/theme-preview/54-terminal-dark-symbols-m3e.png
           # File navigation checks M3E surfaces for path pills, row text,
           # empty/error notes and the complete set of file-type icons.
           test -s target/theme-preview/50-files-light-m3e.png
