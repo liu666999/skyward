@@ -315,6 +315,17 @@ mod tests {
     }
 
     #[test]
+    fn expressive_motion_tokens_are_ordered_and_nonzero() {
+        let m = MotionScheme::EXPRESSIVE;
+        assert!(m.short > 0);
+        assert!(m.short <= m.medium);
+        assert!(m.medium <= m.long);
+        assert!(m.long <= m.expressive);
+        assert!(m.effects_spring_period > 0.0);
+        assert!(m.spatial_spring_period > m.effects_spring_period);
+    }
+
+    #[test]
     fn typography_has_valid_line_heights() {
         let t = TypeScale::EXPRESSIVE;
         for style in [t.display_large, t.display_medium, t.display_small, t.headline_large, t.headline_medium, t.headline_small, t.title_large, t.title_medium, t.title_small, t.body_large, t.body_medium, t.body_small, t.label_large, t.label_medium, t.label_small] {
