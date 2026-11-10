@@ -71,6 +71,17 @@ jobs:
           test -s target/theme-preview/110-files-types-dark-m3e.png
           test -s target/theme-preview/62-files-empty-light-m3e.png
           test -s target/theme-preview/63-files-unreadable-dark-m3e.png
+          # Permissions, mount failures, Wi-Fi and filesystem operations use
+          # the same semantic surfaces and must remain readable in M3E.
+          test -s target/theme-preview/52-file-permissions-dark-m3e.png
+          test -s target/theme-preview/15-mount-light-m3e.png
+          test -s target/theme-preview/16-mount-dark-unmount-failed-m3e.png
+          test -s target/theme-preview/134-wlan-light-nearby-m3e.png
+          test -s target/theme-preview/136-wlan-dark-wrong-password-m3e.png
+          test -s target/theme-preview/140-wlan-password-dark-shown-m3e.png
+          test -s target/theme-preview/160-filesystems-dark-closed-m3e.png
+          test -s target/theme-preview/162-filesystem-dark-cache-m3e.png
+          test -s target/theme-preview/176-part-work-light-repair-failed-m3e.png
           # Destructive confirmation tracks must keep their container text
           # legible in both light and dark M3E schemes.
           test -s target/theme-preview/07-wipe-light-m3e.png
