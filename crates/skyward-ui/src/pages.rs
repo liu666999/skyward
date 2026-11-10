@@ -1124,11 +1124,11 @@ pub fn installing(cx: &Ctx) -> Frame {
     let computer = s.source == Source::Computer;
     let bottom = match &s.install {
         Install::Idle | Install::Starting | Install::Ending if computer => {
-            let row = standing(l.pick(SWITCHING_USB), GREEN, Icon::Usb, l.pick(["从 adb 调试切换到 sideload 模式", "從 adb 偵錯切換到 sideload 模式", "From adb debugging to sideload"]));
+            let row = standing(l.pick(SWITCHING_USB), status_ink(t, GREEN), Icon::Usb, l.pick(["从 adb 调试切换到 sideload 模式", "從 adb 偵錯切換到 sideload 模式", "From adb debugging to sideload"]));
             widgets::list(&mut c, t, f, top, &[row]).bottom
         }
         Install::Idle | Install::Starting | Install::Ending if s.source == Source::Rescue => {
-            let row = standing(l.pick(SWITCHING_USB), GREEN, Icon::Usb, l.pick(["从 adb 调试切换到救援模式", "從 adb 偵錯切換到救援模式", "From adb debugging to rescue mode"]));
+            let row = standing(l.pick(SWITCHING_USB), status_ink(t, GREEN), Icon::Usb, l.pick(["从 adb 调试切换到救援模式", "從 adb 偵錯切換到救援模式", "From adb debugging to rescue mode"]));
             widgets::list(&mut c, t, f, top, &[row]).bottom
         }
         Install::Idle | Install::Starting | Install::Ending => {
@@ -1140,7 +1140,7 @@ pub fn installing(cx: &Ctx) -> Frame {
             asked_package(&mut c, cx, y)
         }
         Install::Locked(_) => {
-            let row = standing(l.pick(["暂无法读取更新包", "暫時無法讀取更新檔", "The package can't be read yet"]), ORANGE, Icon::Lock, l.pick(DECRYPT_NEEDED));
+            let row = standing(l.pick(["暂无法读取更新包", "暫時無法讀取更新檔", "The package can't be read yet"]), status_ink(t, ORANGE), Icon::Lock, l.pick(DECRYPT_NEEDED));
             let y = widgets::list(&mut c, t, f, top, &[row]).bottom;
             let open = widgets::list(&mut c, t, f, y + t.m.card_gap, &[Row::new(l.pick(DECRYPT))]);
             out.extend(hits(&open.rows, &[Action::Open(Screen::Decrypt)]));
@@ -1148,7 +1148,7 @@ pub fn installing(cx: &Ctx) -> Frame {
             asked_package(&mut c, cx, y)
         }
         Install::Waiting if s.source == Source::Rescue => {
-            let row = standing(l.pick(WAITING), GREEN, Icon::Usb, l.pick(CONNECT));
+            let row = standing(l.pick(WAITING), status_ink(t, GREEN), Icon::Usb, l.pick(CONNECT));
             let y = widgets::list(&mut c, t, f, top, &[row]).bottom;
             let y = widgets::section(&mut c, t, f, y, l.pick(RUN_ON_COMPUTER));
             let y = widgets::info_card(&mut c, t, f, y, &[
@@ -1172,7 +1172,7 @@ pub fn installing(cx: &Ctx) -> Frame {
             widgets::footnote(&mut c, t, f, y, note)
         }
         Install::Waiting => {
-            let row = standing(l.pick(WAITING), GREEN, Icon::Usb, l.pick(CONNECT));
+            let row = standing(l.pick(WAITING), status_ink(t, GREEN), Icon::Usb, l.pick(CONNECT));
             let y = widgets::list(&mut c, t, f, top, &[row]).bottom;
             let y = widgets::section(&mut c, t, f, y, l.pick(RUN_ON_COMPUTER));
             let y = widgets::info_card(&mut c, t, f, y, &[(
@@ -1219,7 +1219,7 @@ pub fn installing(cx: &Ctx) -> Frame {
         Install::Checking { size, .. } => {
             let size = fmt::bytes(*size);
             let detail = tr!(l, "文件大小 {size}", "檔案大小 {size}", "File size {size}");
-            let y = widgets::list(&mut c, t, f, top, &[standing(l.pick(READING_FILE), GREEN, Icon::Install, &detail)]).bottom;
+            let y = widgets::list(&mut c, t, f, top, &[standing(l.pick(READING_FILE), status_ink(t, GREEN), Icon::Install, &detail)]).bottom;
             match s.source {
                 Source::Computer | Source::Rescue => widgets::footnote(&mut c, t, f, y, l.pick(KEEP_CABLE)),
                 Source::File(Place::Storage) | Source::Opened { drive: false } | Source::Asked { .. } => y,
@@ -1230,7 +1230,7 @@ pub fn installing(cx: &Ctx) -> Frame {
             let (name, holds) = fmt::image_kind(l, choice.kind);
             let size = fmt::bytes(choice.size);
             let detail = tr!(l, "{size}，{holds}", "{size}，{holds}", "{size} · {holds}");
-            let y = widgets::list(&mut c, t, f, top, &[standing(name, GREEN, Icon::Install, &detail)]).bottom;
+            let y = widgets::list(&mut c, t, f, top, &[standing(name, status_ink(t, GREEN), Icon::Install, &detail)]).bottom;
             let y = widgets::section(&mut c, t, f, y, l.pick(["分区", "分割區", "Partition"]));
             let rows: Vec<Row> = choice
                 .partitions
@@ -1393,7 +1393,7 @@ pub fn installing(cx: &Ctx) -> Frame {
                 "這個刷機包將執行其中的安裝指令碼，安裝指令碼可以改寫本機的任何分割區。",
                 "This zip runs the install script it holds, which can rewrite any partition of this phone.",
             ]);
-            let mut y = widgets::list(&mut c, t, f, top, &[standing(name, ORANGE, Icon::Install, detail)]).bottom;
+            let mut y = widgets::list(&mut c, t, f, top, &[standing(name, status_ink(t, ORANGE), Icon::Install, detail)]).bottom;
             if let Some(note) = fmt::snapshot_script_note(l, &i.snapshot) {
                 y = widgets::footnote(&mut c, t, f, y, note);
             }
@@ -1415,12 +1415,12 @@ pub fn installing(cx: &Ctx) -> Frame {
         }
         Install::Wiped(Ok(())) => {
             let made_anew = l.pick(["下次开机时将重新创建 data 分区", "下次開機時將重新建立 data 分割區", "The data partition is made anew when the phone next starts"]);
-            let y = widgets::list(&mut c, t, f, top, &[standing(l.pick(["已清除", "已清除", "Wiped"]), GREEN, Icon::Wipe, made_anew)]).bottom;
+            let y = widgets::list(&mut c, t, f, top, &[standing(l.pick(["已清除", "已清除", "Wiped"]), status_ink(t, GREEN), Icon::Wipe, made_anew)]).bottom;
             widgets::footnote(&mut c, t, f, y, l.pick(MORE_COMMANDS))
         }
         Install::Wiped(Err(stop)) => {
             let (what, detail) = fmt::erase_stop(l, stop);
-            let mut y = widgets::list(&mut c, t, f, top, &[standing(l.pick(WIPE_INCOMPLETE), RED, Icon::Wipe, &what)]).bottom;
+            let mut y = widgets::list(&mut c, t, f, top, &[standing(l.pick(WIPE_INCOMPLETE), status_ink(t, RED), Icon::Wipe, &what)]).bottom;
             if let Some(d) = detail {
                 y = widgets::footnote(&mut c, t, f, y, &d);
             }
@@ -1510,7 +1510,7 @@ fn finished(
                 "新系統已安裝到槽位 {slot}，重新啟動後將從該槽位啟動。",
                 "The new system is installed to slot {slot}, which starts after a reboot."
             );
-            let y = widgets::list(c, t, f, top, &[standing(installed, GREEN, Icon::Install, &detail)]).bottom;
+            let y = widgets::list(c, t, f, top, &[standing(installed, status_ink(t, GREEN), Icon::Install, &detail)]).bottom;
             let next = widgets::list(c, t, f, y + gap, &[restart]);
             out.extend(hits(&next.rows, &[Action::RebootTo(Target::System)]));
             let y = reflashed(c, cx, next.bottom);
@@ -1519,7 +1519,7 @@ fn finished(
         Outcome::Flashed { partition, slots } => {
             let slots = fmt::slots(l, slots);
             let detail = tr!(l, "{partition} 已刷入{slots}。", "{partition} 已刷入{slots}。", "Flashed to {partition} in {slots}.");
-            let y = widgets::list(c, t, f, top, &[standing(l.pick(["刷入成功", "刷入成功", "Flashed"]), GREEN, Icon::Install, &detail)]).bottom;
+            let y = widgets::list(c, t, f, top, &[standing(l.pick(["刷入成功", "刷入成功", "Flashed"]), status_ink(t, GREEN), Icon::Install, &detail)]).bottom;
             let mut rows = vec![restart];
             let mut acts = vec![Action::RebootTo(Target::System)];
             if *partition == "recovery" {
@@ -1534,7 +1534,7 @@ fn finished(
         }
         Outcome::Ran { .. } => {
             let ran = l.pick(["安装脚本已运行完成。", "安裝指令碼已執行完成。", "The install script ran to its end."]);
-            let y = widgets::list(c, t, f, top, &[standing(installed, GREEN, Icon::Install, ran)]).bottom;
+            let y = widgets::list(c, t, f, top, &[standing(installed, status_ink(t, GREEN), Icon::Install, ran)]).bottom;
             let next = widgets::list(c, t, f, y + gap, &[restart, again]);
             out.extend(hits(&next.rows, &[Action::RebootTo(Target::System), another]));
             let y = reflashed(c, cx, next.bottom);
@@ -1548,20 +1548,20 @@ fn finished(
                 "{name} 已安裝為第二系統，可在「雙系統」中切換。",
                 "{name} is installed as the second system. Switch to it from Dual boot."
             );
-            let y = widgets::list(c, t, f, top, &[standing(installed, GREEN, Icon::Systems, &detail)]).bottom;
+            let y = widgets::list(c, t, f, top, &[standing(installed, status_ink(t, GREEN), Icon::Systems, &detail)]).bottom;
             let next = widgets::list(c, t, f, y + gap, &[Row::new(l.pick(DUAL_BOOT)).icon(PURPLE, Icon::Systems)]);
             out.extend(hits(&next.rows, &[Action::Open(Screen::Systems)]));
             afterwards_of(c, cx, next.bottom, true)
         }
         Outcome::Cancelled => {
-            let y = widgets::list(c, t, f, top, &[standing(l.pick(["已取消", "已取消", "Cancelled"]), SLATE, Icon::Install, nothing_written)]).bottom;
+            let y = widgets::list(c, t, f, top, &[standing(l.pick(["已取消", "已取消", "Cancelled"]), status_ink(t, SLATE), Icon::Install, nothing_written)]).bottom;
             let next = widgets::list(c, t, f, y + gap, &[again]);
             out.extend(hits(&next.rows, &[another]));
             next.bottom
         }
         Outcome::Refused(r) => {
             let reason = fmt::refusal(l, r, &cx.info.codename, source, cx.state.time_zone);
-            let y = widgets::list(c, t, f, top, &[standing(l.pick(["无法安装", "無法安裝", "Can't install"]), ORANGE, Icon::Install, &reason)]).bottom;
+            let y = widgets::list(c, t, f, top, &[standing(l.pick(["无法安装", "無法安裝", "Can't install"]), status_ink(t, ORANGE), Icon::Install, &reason)]).bottom;
             // What the system asked for and did not go in leaves the phone
             // where it was, from which it may go back to the system.
             let (rows, acts) = match source {
@@ -1575,7 +1575,7 @@ fn finished(
         }
         Outcome::Failed(failure) => {
             let (what, detail) = fmt::failure(l, failure, source);
-            let y = widgets::list(c, t, f, top, &[standing(l.pick(["安装失败", "安裝失敗", "Install failed"]), RED, Icon::Install, &what)]).bottom;
+            let y = widgets::list(c, t, f, top, &[standing(l.pick(["安装失败", "安裝失敗", "Install failed"]), status_ink(t, RED), Icon::Install, &what)]).bottom;
             let next = widgets::list(c, t, f, y + gap, &[again, restart]);
             out.extend(hits(&next.rows, &[another, Action::RebootTo(Target::System)]));
             // The package is sent again, or installed or flashed again.
@@ -2845,7 +2845,7 @@ fn skyward_online(c: &mut Canvas, cx: &Ctx, y: f32, out: &mut Vec<Hit>) -> f32 {
                     "Skyward {version} is in the recovery partitions of {names}."
                 ),
             };
-            let y = widgets::list(c, t, f, y + gap, &[standing(l.pick(["更新成功", "更新成功", "Updated"]), GREEN, Icon::Install, &detail)]).bottom;
+            let y = widgets::list(c, t, f, y + gap, &[standing(l.pick(["更新成功", "更新成功", "Updated"]), status_ink(t, GREEN), Icon::Install, &detail)]).bottom;
             let restart = widgets::list(c, t, f, y + gap, &[Row::new(l.pick(["重启到恢复模式", "重新啟動到復原模式", "Reboot to recovery"])).icon(ORANGE, Icon::Power)]);
             out.extend(hits(&restart.rows, &[Action::RebootTo(Target::Recovery)]));
             restart.bottom
