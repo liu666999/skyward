@@ -2634,7 +2634,7 @@ pub fn keyboard(c: &mut Canvas, t: &Theme, f: &Fonts, l: Lang, top: f32, layer: 
     keys.push((Rect::new(space_x + space_w + gx, row_top(3), kw, kh), Cap::Char('.')));
     keys.push((Rect::new(w - pad - enter_w, row_top(3), enter_w, kh), Cap::Enter));
 
-    let radius = m.dp(KEY_RADIUS_DP);
+    let radius = m.dp(t.shapes.extra_small + 2.0);
     let glyph_px = m.dp(21.0);
     for &(r, cap) in &keys {
         let plain = matches!(cap, Cap::Char(_) | Cap::Space);
