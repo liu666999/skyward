@@ -1549,16 +1549,15 @@ fn updown(c: &mut Canvas, t: &Theme, right: f32, cy: f32, color: Rgba) {
     c.line(mid, down + foot, x1, down + top, sw, color);
 }
 
-// The stock list of choices opened from a row, in dp: how wide it is, how
-// far in from the row's right end and down from its top it opens, its
-// corners, the room above and below its choices, each choice's height,
+// The list of choices opened from a row, in dp: how wide it is, how far in
+// from the row's right end and down from its top it opens, the room above
+// and below its choices, each choice's height,
 // where the words start and how big they are, the tick's centre from the
 // right edge and its stroke, and the deviation of the blur that makes its
 // shadow.
 const CHOICES_W: f32 = 286.0;
 const CHOICES_RIGHT: f32 = 16.7;
 const CHOICES_DROP: f32 = 15.0;
-const CHOICES_RADIUS: f32 = 24.0;
 const CHOICES_PAD: f32 = 8.0;
 const CHOICE_H: f32 = 43.67;
 const CHOICE_TEXT_X: f32 = 20.3;
@@ -1574,7 +1573,9 @@ const CHOICES_SHADOW: f32 = 10.7;
 #[allow(clippy::too_many_arguments)]
 pub fn choices(c: &mut Canvas, t: &Theme, f: &Fonts, row: Rect, names: &[&str], chosen: Option<usize>, held: Option<usize>) -> Vec<Rect> {
     let m = &t.m;
-    let (w, item, pad, r) = (m.dp(CHOICES_W), m.dp(CHOICE_H), m.dp(CHOICES_PAD), m.dp(CHOICES_RADIUS));
+    // Keep the stock popup's 24 dp corners; the expressive scale lifts it
+    // into the larger M3E extra-large family without changing its hitbox.
+    let (w, item, pad, r) = (m.dp(CHOICES_W), m.dp(CHOICE_H), m.dp(CHOICES_PAD), m.dp(t.shapes.extra_large + 4.0));
     let (x, y) = (row.x + row.w - m.dp(CHOICES_RIGHT) - w, row.y + m.dp(CHOICES_DROP));
     let h = pad * 2.0 + item * names.len() as f32;
     let rects: Vec<Rect> = (0..names.len()).map(|i| Rect::new(x, y + pad + item * i as f32, w, item)).collect();
