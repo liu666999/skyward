@@ -1,5 +1,6 @@
 use crate::color::{over, Rgba};
 use crate::glow::{self, Glow};
+use crate::expressive::{self, ColorScheme};
 
 #[derive(Clone, Copy)]
 pub struct Palette {
@@ -163,6 +164,46 @@ impl Theme {
 
     pub fn dark(w: u32, h: u32, px_per_dp: f32) -> Self {
         Theme { pal: DARK, hero: DARK_HERO, m: metrics(w, h, px_per_dp), dark: true }
+    }
+
+    /// Material 3 Expressive palette adapted to Skyward's existing widgets.
+    /// Layout, hit targets, status inks and recovery behaviour stay unchanged.
+    pub fn expressive(w: u32, h: u32, px_per_dp: f32, dark: bool) -> Self {
+        let mut theme = if dark { Self::dark(w, h, px_per_dp) } else { Self::light(w, h, px_per_dp) };
+        let c: ColorScheme = if dark { expressive::Theme::dark().colors } else { expressive::Theme::light().colors };
+        theme.pal = Palette {
+            bg: c.background,
+            card: c.surface_container,
+            text: c.on_surface,
+            subtitle: c.on_surface_variant,
+            value: c.on_surface_variant,
+            section: c.primary,
+            chevron: c.outline,
+            accent: c.primary,
+            track: c.surface_container_high,
+            switch_off: c.surface_variant,
+            search: c.surface_container_high,
+            search_icon: c.on_surface_variant,
+            placeholder: c.on_surface_variant.with_alpha(150),
+            badge: c.primary_container,
+            status: c.on_surface,
+            danger: c.error,
+            danger_soft: c.error_container,
+            info: c.on_surface_variant,
+            outline: c.outline,
+            spec_label: c.on_surface_variant,
+            round: c.surface_container_high,
+            round_mark: c.on_surface_variant,
+            updown: c.surface_variant,
+            popup: c.surface_container_high,
+            shadow: c.shadow.with_alpha(if dark { 90 } else { 36 }),
+            ..theme.pal
+        };
+        theme.hero.card = if dark { c.surface_container_high.with_alpha(210) } else { c.surface_container_lowest };
+        theme.hero.title = c.on_surface;
+        theme.hero.value = c.on_surface_variant;
+        theme.hero.chevron = c.outline;
+        theme
     }
 
     /// This theme with every card as it shows behind a row held down.
