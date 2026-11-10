@@ -298,7 +298,10 @@ pub fn keys(c: &mut Canvas, t: &Theme, f: &Fonts, l: &Layout, keys: &[TermKey], 
     for (k, &key) in keys.iter().enumerate() {
         let r = Rect::new(m.margin + k as f32 * (w + gap), l.keys_top, w, h);
         let held = key == TermKey::Ctrl && ctrl;
-        let (fill, ink) = if held { (t.pal.accent, t.pal.card) } else { (t.pal.card, t.pal.text) };
+        // M3E's primary key needs its matching on-primary ink; stock keeps
+        // the original card-coloured Ctrl label in both brightness modes.
+        let held_ink = if t.typography.is_some() { t.pal.on_accent } else { t.pal.card };
+        let (fill, ink) = if held { (t.pal.accent, held_ink) } else { (t.pal.card, t.pal.text) };
         c.fill_round_rect(r.x, r.y, r.w, r.h, m.dp(KEY_RADIUS_DP), fill);
         let label = match key {
             TermKey::Esc => "Esc",
@@ -322,6 +325,18 @@ pub fn keys(c: &mut Canvas, t: &Theme, f: &Fonts, l: &Layout, keys: &[TermKey], 
 mod tests {
     use super::*;
     use crate::widgets::Layer;
+
+    #[test]
+    fn held_ctrl_uses_the_matching_foreground_for_each_theme() {
+        for dark in [false, true] {
+            let stock = if dark { Theme::dark(1200, 2608, 3.0) } else { Theme::light(1200, 2608, 3.0) };
+            let expressive = Theme::expressive(1200, 2608, 3.0, dark);
+            let stock_ink = if stock.typography.is_some() { stock.pal.on_accent } else { stock.pal.card };
+            let expressive_ink = if expressive.typography.is_some() { expressive.pal.on_accent } else { expressive.pal.card };
+            assert_eq!(stock_ink, stock.pal.card, "stock Ctrl label remains unchanged");
+            assert_eq!(expressive_ink, expressive.pal.on_accent, "M3E Ctrl label follows on-primary");
+        }
+    }
 
     #[test]
     fn keys_send_what_a_terminal_sends() {
