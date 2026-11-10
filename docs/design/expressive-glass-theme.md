@@ -118,7 +118,7 @@ This is preview-generation support only. The screenshots have not yet been gener
 
 The home device-information card now has a separate Liquid Glass switch in Settings. The choice is stored in the recovery settings JSON and defaults to off for both fresh installs and older settings files. It does not depend on the stock/M3E palette choice.
 
-When enabled, the renderer snapshots the already-painted page as the backdrop, paints the bounded glass panel, and only then draws the avatar, labels, chevron and interactive rows. When disabled, the original flat card fill path is retained. The first integration is deliberately limited to this decorative home card; destructive-operation, confirmation, progress and other functional cards remain unchanged. The material currently uses the Standard preset. The preference and theme-toggle behavior have regression tests in source, but those tests have not yet been run in this environment.
+When enabled, the renderer snapshots the already-painted page as the backdrop, paints the bounded glass panel, and only then draws the avatar, labels, chevron and interactive rows. When disabled, the original flat card fill path is retained. The first integration is deliberately limited to this decorative home card; destructive-operation, confirmation, progress and other functional cards remain unchanged. The material currently uses the Standard preset. Regression tests now cover preference persistence, legacy-file defaults, palette independence, the enabled/disabled device-card rendering difference, and untouched pixels outside the card. These tests are committed but have not yet been run in this environment.
 
 ### Renderer regression coverage
 
