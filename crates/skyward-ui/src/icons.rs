@@ -382,11 +382,31 @@ pub fn glyph(c: &mut Canvas, icon: Icon, cx: f32, cy: f32, size: f32, ink: Rgba)
 
 /// Draw `icon` as a row shows it: its tile in `color`, the tile's top-left
 /// corner at (`x`, `y`), and its glyph in white over it.
+/// Translate the stock Settings icon-tile colours into Material 3 roles.
+/// The stock palette is intentionally passed in by pages.rs and remains
+/// untouched for the original themes.
+fn tile_inks(t: &Theme, stock: Rgba) -> (Rgba, Rgba) {
+    if t.typography.is_none() {
+        return (stock, Rgba::rgb(255, 255, 255));
+    }
+    let c = if t.dark { crate::expressive::ColorScheme::dark() } else { crate::expressive::ColorScheme::light() };
+    match (stock.r, stock.g, stock.b) {
+        (0x34, 0x82, 0xff) => (c.primary_container, c.on_primary_container),
+        (0x1d, 0xcd, 0x3a) => (c.tertiary_container, c.on_tertiary_container),
+        (0x77, 0x67, 0xf9) => (c.secondary_container, c.on_secondary_container),
+        (0x8c, 0x9d, 0xb0) => (c.surface_container_high, c.on_surface_variant),
+        (0xff, 0x69, 0x00) => (c.secondary, c.on_secondary),
+        (0xfa, 0x38, 0x2e) => (c.error_container, c.on_error_container),
+        _ => (stock, Rgba::rgb(255, 255, 255)),
+    }
+}
+
 pub fn tile(c: &mut Canvas, t: &Theme, x: f32, y: f32, color: Rgba, icon: Icon) {
     let s = t.m.icon;
     let (cx, cy) = (x + s / 2.0, y + s / 2.0);
-    draw(c, Art::Tile, cx, cy, s, color);
-    glyph(c, icon, cx, cy, s, Rgba::rgb(255, 255, 255));
+    let (tile, ink) = tile_inks(t, color);
+    draw(c, Art::Tile, cx, cy, s, tile);
+    glyph(c, icon, cx, cy, s, ink);
 }
 
 /// What is drawn from outlines: a tile, or a glyph.
@@ -580,6 +600,42 @@ mod tests {
         let shield = drawn(Icon::Shield);
         assert!(covers(&shield, 14.0, 7.0), "the shield");
         assert!(!covers(&shield, 13.3, 15.4), "the tick left out of it");
+    }
+
+    #[test]
+    fn material3_tiles_use_container_roles_and_matching_foregrounds_in_both_modes() {
+        let stock = [
+            (Rgba::rgb(0x34, 0x82, 0xff), "primary"),
+            (Rgba::rgb(0x1d, 0xcd, 0x3a), "tertiary"),
+            (Rgba::rgb(0x77, 0x67, 0xf9), "secondary"),
+            (Rgba::rgb(0x8c, 0x9d, 0xb0), "surface"),
+            (Rgba::rgb(0xff, 0x69, 0x00), "secondary-solid"),
+            (Rgba::rgb(0xfa, 0x38, 0x2e), "error"),
+        ];
+        for dark in [false, true] {
+            let t = Theme::expressive(1200, 2608, 3.0, dark);
+            let c = if dark { crate::expressive::ColorScheme::dark() } else { crate::expressive::ColorScheme::light() };
+            let expected = [
+                (c.primary_container, c.on_primary_container),
+                (c.tertiary_container, c.on_tertiary_container),
+                (c.secondary_container, c.on_secondary_container),
+                (c.surface_container_high, c.on_surface_variant),
+                (c.secondary, c.on_secondary),
+                (c.error_container, c.on_error_container),
+            ];
+            for ((source, _), roles) in stock.into_iter().zip(expected) {
+                assert_eq!(tile_inks(&t, source), roles);
+            }
+        }
+    }
+
+    #[test]
+    fn stock_tiles_keep_their_original_colour_and_white_glyph() {
+        let t = Theme::light(1200, 2608, 3.0);
+        let source = Rgba::rgb(0x34, 0x82, 0xff);
+        assert_eq!(tile_inks(&t, source), (source, Rgba::rgb(255, 255, 255)));
+        let dark = Theme::dark(1200, 2608, 3.0);
+        assert_eq!(tile_inks(&dark, source), (source, Rgba::rgb(255, 255, 255)));
     }
 
     #[test]
