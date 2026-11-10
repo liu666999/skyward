@@ -312,6 +312,7 @@ mod tests {
             assert!(contrast(colors.on_primary_container, colors.primary_container) >= 4.5);
             assert!(contrast(colors.on_error, colors.error) >= 4.5);
             assert!(contrast(colors.on_surface_variant, colors.surface_container) >= 4.5);
+            assert!(contrast(colors.on_surface_variant, colors.surface_container_high) >= 4.5);
             assert!(contrast(colors.on_secondary, colors.secondary) >= 4.5);
             assert!(contrast(colors.on_secondary_container, colors.secondary_container) >= 4.5);
             assert!(contrast(colors.on_tertiary, colors.tertiary) >= 4.5);
