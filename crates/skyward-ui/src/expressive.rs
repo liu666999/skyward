@@ -307,6 +307,7 @@ mod tests {
     fn primary_text_and_controls_keep_readable_contrast_in_both_schemes() {
         for colors in [ColorScheme::light(), ColorScheme::dark()] {
             assert!(contrast(colors.on_surface, colors.surface) >= 7.0);
+            assert!(contrast(colors.on_surface, colors.surface_container_highest) >= 4.5);
             assert!(contrast(colors.on_primary, colors.primary) >= 4.5);
             assert!(contrast(colors.on_primary_container, colors.primary_container) >= 4.5);
             assert!(contrast(colors.on_error, colors.error) >= 4.5);
