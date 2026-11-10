@@ -38,9 +38,9 @@ should be CPU-renderer-native and region-limited.
   backdrop sampling itself.
 - Existing `theme.rs`: remains the adapter that converts a selected theme into
   the palette and metrics consumed by current pages/widgets.
-- Existing `canvas.rs` and `sprite.rs`: candidates for a later clipped
-  backdrop-snapshot and blur implementation. Avoid copying the whole screen
-  for each card or each animation frame.
+- Existing `canvas.rs`: owns the clipped backdrop sampling and blur renderer.
+  It computes the blur before writing the panel, so the full page is not
+  cloned for each card. `sprite.rs` remains unchanged.
 
 ## Glass quality levels
 
@@ -106,7 +106,7 @@ with the repository's GPL-3.0-or-later distribution.
 
 - `theme.rs` exposes `Theme::expressive(w, h, px_per_dp, dark)`, adapting M3E semantic roles into the existing Skyward palette consumed by current widgets. Device geometry, row heights, touch targets and recovery actions remain inherited from the stock theme.
 - The Settings page now exposes four complete presets (stock light/dark and M3E light/dark), and the selected palette family is persisted with backward-compatible defaults.
-- Glass material parameters remain separate from the active renderer; backdrop sampling, clipped blur, and page/component wiring remain outstanding.
+- The material presets are now consumed by an opt-in home-card renderer. Broader page/component wiring, quality selection, and target-device performance validation remain outstanding.
 
 ### Core-page preview matrix
 
@@ -126,7 +126,7 @@ Host-side unit tests now exercise the glass panel's visible blur on a high-contr
 
 ### Renderer primitive status
 
-A bounded rounded-panel renderer now exists as `Canvas::glass_round_rect`. It samples only the panel's padded bounds, performs two separable box-blur passes over that region, applies the material tint and a restrained top-biased edge highlight, and clips the result to the rounded rectangle. It requires complete, same-sized backdrop and target canvases.
+A bounded rounded-panel renderer now exists as `Canvas::glass_round_rect`. It samples only the panel's padded bounds from the canvas before modifying it, performs two separable box-blur passes over that region, applies the material tint and a restrained top-biased edge highlight, and clips the result to the rounded rectangle. It requires a complete target canvas but no separate full-screen backdrop allocation; the blur buffers are bounded to the panel and its blur margin.
 
 The primitive is currently **not called by the page or widget renderer**. No theme setting selects a glass quality, no card/dialog has been switched to this path, and no screenshot or performance result has been recorded. The next implementation step is to add focused renderer tests (including edge clipping and out-of-bounds panels), then wire an opt-in material into a small number of safe decorative surfaces before broadening coverage. Do not enable it globally yet.
 
