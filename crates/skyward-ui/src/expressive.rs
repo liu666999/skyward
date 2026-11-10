@@ -26,6 +26,11 @@ pub struct ColorScheme {
     pub on_error: Rgba,
     pub error_container: Rgba,
     pub on_error_container: Rgba,
+    /// Additional semantic containers for successful and cautionary states.
+    pub success_container: Rgba,
+    pub on_success_container: Rgba,
+    pub warning_container: Rgba,
+    pub on_warning_container: Rgba,
     pub background: Rgba,
     pub on_background: Rgba,
     pub surface: Rgba,
@@ -68,6 +73,10 @@ impl ColorScheme {
             on_error: Rgba::rgb(255, 255, 255),
             error_container: Rgba::rgb(255, 218, 214),
             on_error_container: Rgba::rgb(65, 0, 2),
+            success_container: Rgba::rgb(205, 239, 207),
+            on_success_container: Rgba::rgb(15, 55, 21),
+            warning_container: Rgba::rgb(255, 225, 184),
+            on_warning_container: Rgba::rgb(69, 40, 0),
             background: Rgba::rgb(249, 249, 255),
             on_background: Rgba::rgb(25, 28, 32),
             surface: Rgba::rgb(249, 249, 255),
@@ -110,6 +119,10 @@ impl ColorScheme {
             on_error: Rgba::rgb(105, 0, 5),
             error_container: Rgba::rgb(147, 0, 10),
             on_error_container: Rgba::rgb(255, 218, 214),
+            success_container: Rgba::rgb(35, 74, 40),
+            on_success_container: Rgba::rgb(205, 239, 207),
+            warning_container: Rgba::rgb(88, 52, 8),
+            on_warning_container: Rgba::rgb(255, 225, 184),
             background: Rgba::rgb(17, 19, 24),
             on_background: Rgba::rgb(226, 226, 233),
             surface: Rgba::rgb(17, 19, 24),
@@ -320,6 +333,8 @@ mod tests {
             assert!(contrast(colors.on_tertiary, colors.tertiary) >= 4.5);
             assert!(contrast(colors.on_tertiary_container, colors.tertiary_container) >= 4.5);
             assert!(contrast(colors.on_error_container, colors.error_container) >= 4.5);
+            assert!(contrast(colors.on_success_container, colors.success_container) >= 4.5);
+            assert!(contrast(colors.on_warning_container, colors.warning_container) >= 4.5);
             assert!(contrast(colors.outline, colors.surface) >= 3.0);
             assert!(contrast(colors.inverse_on_surface, colors.inverse_surface) >= 4.5);
         }
