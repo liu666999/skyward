@@ -695,9 +695,9 @@ pub fn back_cue_depth(t: &Theme, travel: f32) -> f32 {
 }
 
 /// The back cue swelling from a screen edge while a finger swipes in from
-/// it: a dark wave `depth` pixels deep at its crest around `cy`, edged in
-/// light blue, holding a white `<` once lifting there would go back. The
-/// `<` points back on either edge.
+/// it: a themed wave `depth` pixels deep at its crest around `cy`, edged in
+/// the theme's accent, holding a contrasting `<` once lifting there would go
+/// back. The `<` points back on either edge.
 pub fn back_cue(c: &mut Canvas, t: &Theme, from_left: bool, cy: f32, depth: f32, arrow: bool) {
     let (fill_ink, rim_ink) = (t.pal.backdrop, t.pal.rim);
     let m = &t.m;
@@ -912,7 +912,7 @@ fn chip(t: &Theme, (cx, cy, r): (f32, f32, f32)) -> (Canvas, i32, i32) {
     (c, x0, y0)
 }
 
-/// A short message in a dark capsule above the bottom edge.
+/// A short message in an inverse-coloured capsule above the bottom edge.
 pub fn toast(c: &mut Canvas, t: &Theme, f: &Fonts, text: &str) {
     let m = &t.m;
     let px = m.sub_px;
@@ -1700,7 +1700,7 @@ pub fn switch(c: &mut Canvas, t: &Theme, right: f32, cy: f32, on: bool) {
     c.fill_circle(kx, cy, k / 2.0, t.pal.on_accent);
 }
 
-/// The stock thick slider: a capsule track with the fill and a white knob
+/// The thick slider: a capsule track with the fill and an on-accent knob
 /// that sits inside the fill's rounded end.
 pub fn slider(c: &mut Canvas, t: &Theme, x: f32, top: f32, w: f32, value: f32) {
     let m = &t.m;
@@ -2503,8 +2503,8 @@ fn system_card(c: &mut Canvas, t: &Theme, f: &Fonts, r: Rect, card: &SystemCard)
     }
 }
 
-/// The check of a choice centred on (`cx`, `cy`): an accent disc with a
-/// white tick on the one chosen, an empty ring on the others.
+/// The check of a choice centred on (`cx`, `cy`): an accent disc with an
+/// on-accent tick on the one chosen, an empty ring on the others.
 pub fn check_circle(c: &mut Canvas, t: &Theme, cx: f32, cy: f32, on: bool) {
     let m = &t.m;
     let d = m.dp(24.0);
