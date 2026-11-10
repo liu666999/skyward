@@ -2511,8 +2511,8 @@ pub fn check_circle(c: &mut Canvas, t: &Theme, cx: f32, cy: f32, on: bool) {
     if on {
         c.fill_circle(cx, cy, d / 2.0, t.pal.accent);
         let s = d * 0.5;
-        c.line(cx - s * 0.42, cy + s * 0.02, cx - s * 0.1, cy + s * 0.32, m.stroke, Rgba::rgb(255, 255, 255));
-        c.line(cx - s * 0.1, cy + s * 0.32, cx + s * 0.44, cy - s * 0.3, m.stroke, Rgba::rgb(255, 255, 255));
+        c.line(cx - s * 0.42, cy + s * 0.02, cx - s * 0.1, cy + s * 0.32, m.stroke, t.pal.on_accent);
+        c.line(cx - s * 0.1, cy + s * 0.32, cx + s * 0.44, cy - s * 0.3, m.stroke, t.pal.on_accent);
     } else {
         c.stroke_circle(cx, cy, d / 2.0 - m.dp(1.0), m.dp(2.0), t.pal.switch_off);
     }
