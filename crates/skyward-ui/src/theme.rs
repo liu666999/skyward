@@ -462,6 +462,7 @@ const DARK: Palette = Palette {
     badge_ink: Rgba::rgb(84, 136, 248),
     danger_soft_ink: Rgba::rgb(255, 92, 84),
     warning_ink: Rgba::rgb(255, 255, 255),
+    success_ink: Rgba::rgb(255, 255, 255),
     info: Rgba::rgb(214, 214, 214),
     outline: Rgba::rgb(140, 140, 140),
     spec_label: Rgba::rgb(128, 128, 128),
