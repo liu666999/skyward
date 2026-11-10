@@ -221,7 +221,9 @@ impl Theme {
             switch_off: c.surface_variant,
             search: c.surface_container_high,
             search_icon: c.on_surface_variant,
-            placeholder: c.on_surface_variant.with_alpha(150),
+            // M3 text-field placeholders use the full on-surface-variant role;
+            // lowering opacity here can push small recovery UI text below 4.5:1.
+            placeholder: c.on_surface_variant,
             badge: c.primary_container,
             avatar: c.primary_container,
             avatar_glyph: c.on_primary_container,
