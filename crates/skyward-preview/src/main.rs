@@ -1030,6 +1030,7 @@ fn main() -> Result<()> {
             || screen == Screen::Files
             || screen == Screen::Wipe
             || screen == Screen::RestoreBackup
+            || screen == Screen::Clash
             || matches!(screen, Screen::Choose(_))
         {
             &[false, true]
