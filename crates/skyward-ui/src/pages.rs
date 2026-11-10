@@ -994,7 +994,7 @@ fn percent(share: f32) -> u32 {
 /// palette is returned unchanged; status meaning is retained in both schemes.
 fn status_ink(t: &Theme, stock: Rgba) -> Rgba {
     if t.typography.is_none() { return stock; }
-    if stock == GREEN { t.pal.badge_ink }
+    if stock == GREEN { t.pal.success_ink }
     else if stock == RED { t.pal.danger }
     else if stock == ORANGE { t.pal.warning_ink }
     else if stock == BLUE { t.pal.accent }
@@ -4039,7 +4039,7 @@ mod tests {
         let light = Theme::expressive(1440, 3200, 3.5, false);
         let dark = Theme::expressive(1440, 3200, 3.5, true);
         for t in [&light, &dark] {
-            assert_eq!(status_ink(t, GREEN), t.pal.badge_ink);
+            assert_eq!(status_ink(t, GREEN), t.pal.success_ink);
             assert_eq!(status_ink(t, RED), t.pal.danger);
             assert_eq!(status_ink(t, ORANGE), t.pal.warning_ink);
             assert_eq!(status_ink(t, SLATE), t.pal.subtitle);
