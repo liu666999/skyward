@@ -114,6 +114,12 @@ The host preview runner now renders its existing core-page screenshot set twice:
 
 This is preview-generation support only. The screenshots have not yet been generated or visually reviewed in this environment, and this does not replace the full-page matrix, workspace tests, Android target build, or device verification.
 
+### Renderer primitive status
+
+A bounded rounded-panel renderer now exists as `Canvas::glass_round_rect`. It samples only the panel's padded bounds, performs two separable box-blur passes over that region, applies the material tint and a restrained top-biased edge highlight, and clips the result to the rounded rectangle. It requires complete, same-sized backdrop and target canvases.
+
+The primitive is currently **not called by the page or widget renderer**. No theme setting selects a glass quality, no card/dialog has been switched to this path, and no screenshot or performance result has been recorded. The next implementation step is to add focused renderer tests (including edge clipping and out-of-bounds panels), then wire an opt-in material into a small number of safe decorative surfaces before broadening coverage. Do not enable it globally yet.
+
 ## Current status
 
 The M3E theme adapter, four-way selector, persistent choice, semantic palette mapping for shared controls, named shape/type metadata, compact component and popup shape-role mapping and contrast/regression tests are in place. The theme still needs a full preview pass across every page and a successful workspace CI run. M3E spatial/effects spring periods and short/medium reveal timings are now applied to existing navigation, search morph and press-feedback animations; device power/display timing and gesture thresholds remain unchanged. The current fork branch has no reported GitHub Actions run or commit status, and this editing environment has no Rust toolchain for a local build. Liquid Glass is not yet integrated into the active page components; no completed Liquid Glass implementation is claimed.
