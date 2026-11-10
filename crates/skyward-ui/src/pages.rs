@@ -353,7 +353,8 @@ pub fn settings(cx: &Ctx) -> Frame {
     let mut c = long_page(cx);
     let mut out = Vec::new();
     let top = t.m.content_top;
-    let themes = widgets::theme_picker(&mut c, t, f, l, top + t.m.dp(8.9), s.expressive);
+    let theme_top = widgets::section_first(&mut c, t, f, top, l.pick(["主题", "主題", "Theme"]));
+    let themes = widgets::theme_picker(&mut c, t, f, l, theme_top + t.m.dp(8.9), s.expressive);
     out.extend(hits(&themes.rows, &[Action::Theme { dark: false, expressive: false }, Action::Theme { dark: true, expressive: false }, Action::Theme { dark: false, expressive: true }, Action::Theme { dark: true, expressive: true }]));
     let mut y = widgets::section(&mut c, t, f, themes.bottom, l.pick(["亮度", "亮度", "Brightness"]));
     let off = fmt::screen_off(l, SCREEN_OFF[s.screen_off]);
