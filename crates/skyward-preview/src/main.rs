@@ -1037,6 +1037,7 @@ fn main() -> Result<()> {
         let expressive_variants: &[bool] = if screen == Screen::Search
             || screen == Screen::Terminal
             || screen == Screen::Files
+            || screen == Screen::Rename
             || screen == Screen::Permissions
             || screen == Screen::Wlan
             || screen == Screen::WlanPassword
