@@ -116,3 +116,8 @@ The M3E theme adapter, four-way selector, persistent choice, semantic palette ma
 ### Expressive label letter spacing
 
 The canvas exposes additive spaced-text measurement and drawing methods. Existing text APIs retain zero additional spacing. The theme picker applies the M3 Expressive label-medium letter spacing only when an expressive type scale is active; stock theme captions continue to use their original spacing. Measurement, centering and truncation share the same spacing value.
+
+
+### Expressive section and row-tag typography
+
+Page section captions use the M3 Expressive label-medium letter spacing. Inline row tags use label-small spacing for both their measured width and rendered glyph advances, so the tag's horizontal placement remains consistent. Both additions are opt-in through the expressive type scale; stock spacing remains zero and card geometry and hit targets are unchanged.
