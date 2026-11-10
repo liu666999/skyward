@@ -883,11 +883,11 @@ impl Canvas {
         }
     }
 
-    /// Draw a bounded liquid-glass rounded panel over an already-rendered backdrop.
+    /// Draw a bounded liquid-glass rounded panel over the pixels already on this canvas.
+    /// The blur is computed before writing the panel, so no full-screen backdrop copy is needed.
     /// Only the panel plus its blur margin is sampled; the full screen is never blurred.
     pub fn glass_round_rect(
         &mut self,
-        backdrop: &Canvas,
         x: f32,
         y: f32,
         w: f32,
@@ -895,8 +895,7 @@ impl Canvas {
         radius: f32,
         material: crate::glass::GlassMaterial,
     ) {
-        assert!(self.whole() && backdrop.whole(), "glass panels need complete backdrop canvases");
-        assert_eq!((self.w, self.h), (backdrop.w, backdrop.h), "glass backdrop and target sizes match");
+        assert!(self.whole(), "glass panels need a complete canvas");
         if w <= 0.0 || h <= 0.0 { return; }
         let blur = material.blur_radius.ceil().clamp(0.0, 24.0) as i32;
         let x0 = (x.floor() as i32 - blur).clamp(0, self.w as i32);
@@ -917,8 +916,8 @@ impl Canvas {
                 let lo = xx.saturating_sub(blur as usize);
                 let hi = (xx + blur as usize + 1).min(rw);
                 for sx in lo..hi {
-                    let i = (((y0 as usize + yy) * backdrop.w as usize + x0 as usize + sx) * 4) as usize;
-                    for k in 0..3 { sum[k] += backdrop.data[i + k] as u32; }
+                    let i = (((y0 as usize + yy) * self.w as usize + x0 as usize + sx) * 4) as usize;
+                    for k in 0..3 { sum[k] += self.data[i + k] as u32; }
                     count += 1;
                 }
                 horizontal[yy * rw + xx] = [(sum[0] / count) as u8, (sum[1] / count) as u8, (sum[2] / count) as u8];
@@ -1466,7 +1465,7 @@ mod tests {
         }
 
         let mut target = backdrop.clone();
-        target.glass_round_rect(&backdrop, 5.0, 5.0, 14.0, 14.0, 4.0, test_glass_material(2.0));
+        target.glass_round_rect(5.0, 5.0, 14.0, 14.0, 4.0, test_glass_material(2.0));
 
         let pixel = |c: &Canvas, x: usize, y: usize| {
             let i = (y * c.w as usize + x) * 4;
@@ -1483,7 +1482,7 @@ mod tests {
     fn glass_panel_clips_safely_when_its_bounds_extend_past_the_canvas() {
         let backdrop = Canvas::filled(12, 10, Rgba::rgb(80, 100, 120));
         let mut target = backdrop.clone();
-        target.glass_round_rect(&backdrop, -4.0, -3.0, 12.0, 10.0, 3.0, test_glass_material(3.0));
+        target.glass_round_rect(-4.0, -3.0, 12.0, 10.0, 3.0, test_glass_material(3.0));
         assert_eq!(target.w, 12);
         assert_eq!(target.h, 10);
         assert_eq!(target.data.len(), backdrop.data.len());
@@ -1494,7 +1493,7 @@ mod tests {
     fn glass_zero_blur_keeps_a_uniform_backdrop_stable() {
         let backdrop = Canvas::filled(10, 10, Rgba::rgb(34, 56, 78));
         let mut target = backdrop.clone();
-        target.glass_round_rect(&backdrop, 1.0, 1.0, 8.0, 8.0, 2.0, test_glass_material(0.0));
+        target.glass_round_rect(1.0, 1.0, 8.0, 8.0, 2.0, test_glass_material(0.0));
         assert_eq!(target.data, backdrop.data);
     }
 
