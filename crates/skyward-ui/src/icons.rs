@@ -390,10 +390,10 @@ fn tile_inks(t: &Theme, stock: Rgba) -> (Rgba, Rgba) {
     let c = if t.dark { crate::expressive::ColorScheme::dark() } else { crate::expressive::ColorScheme::light() };
     match (stock.r, stock.g, stock.b) {
         (0x34, 0x82, 0xff) => (c.primary_container, c.on_primary_container),
-        (0x1d, 0xcd, 0x3a) => (c.tertiary_container, c.on_tertiary_container),
-        (0x77, 0x67, 0xf9) => (c.secondary_container, c.on_secondary_container),
+        (0x1d, 0xcd, 0x3a) => (c.success_container, c.on_success_container),
+        (0x77, 0x67, 0xf9) => (c.tertiary_container, c.on_tertiary_container),
         (0x8c, 0x9d, 0xb0) => (c.surface_container_high, c.on_surface_variant),
-        (0xff, 0x69, 0x00) => (c.secondary, c.on_secondary),
+        (0xff, 0x69, 0x00) => (c.warning_container, c.on_warning_container),
         (0xfa, 0x38, 0x2e) => (c.error_container, c.on_error_container),
         _ => (stock, Rgba::rgb(255, 255, 255)),
     }
@@ -615,10 +615,10 @@ mod tests {
             let c = if dark { crate::expressive::ColorScheme::dark() } else { crate::expressive::ColorScheme::light() };
             let expected = [
                 (c.primary_container, c.on_primary_container),
+                (c.success_container, c.on_success_container),
                 (c.tertiary_container, c.on_tertiary_container),
-                (c.secondary_container, c.on_secondary_container),
                 (c.surface_container_high, c.on_surface_variant),
-                (c.secondary, c.on_secondary),
+                (c.warning_container, c.on_warning_container),
                 (c.error_container, c.on_error_container),
             ];
             for (source, roles) in stock.into_iter().zip(expected) {
