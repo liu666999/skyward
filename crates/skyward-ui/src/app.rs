@@ -8399,6 +8399,16 @@ mod tests {
     }
 
     #[test]
+    fn row_press_uses_the_selected_effects_spring_period() {
+        let row = RowPress { rect: Rect::new(0.0, 0.0, 100.0, 50.0), rise: 0, fall: None };
+        let stock = row.level(150, ROW_PRESS_PERIOD);
+        let expressive = row.level(150, crate::expressive::MotionScheme::EXPRESSIVE.effects_spring_period);
+        assert!(expressive < stock, "the expressive effects spring has a slower, softer settle");
+        assert!(row.changing(150, crate::expressive::MotionScheme::EXPRESSIVE.effects_spring_period));
+        assert!(!row.gone(150, crate::expressive::MotionScheme::EXPRESSIVE.effects_spring_period));
+    }
+
+    #[test]
     fn theme_previews_switch_all_four_presets() {
         let (f, i) = (fonts(), info());
         let mut app = App::new(Screen::Settings, W, H, PPD);
