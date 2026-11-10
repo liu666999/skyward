@@ -313,6 +313,7 @@ mod tests {
             language_chosen: true,
             dark: true,
             expressive: true,
+            liquid_glass: true,
             brightness: 0.7,
             screen_off: 6,
             time_zone: 7,
@@ -345,12 +346,14 @@ mod tests {
         let mut restored = State::default();
         loaded.apply(&mut restored);
         assert!(restored.expressive);
+        assert!(restored.liquid_glass, "the glass choice persists independently");
 
         let old = Settings::read(r#"{ "dark": true }"#).unwrap();
         let mut legacy = State::default();
         old.apply(&mut legacy);
         assert!(legacy.dark);
         assert!(!legacy.expressive);
+        assert!(!legacy.liquid_glass, "older settings keep the glass effect off by default");
     }
 
     #[test]
@@ -375,6 +378,7 @@ mod tests {
         kept.apply(&mut state);
         assert!(state.dark && state.compress);
         assert!(!state.expressive, "old settings without the theme field keep the stock palette");
+        assert!(!state.liquid_glass, "old settings keep the optional glass effect off");
         assert_eq!(Settings::of(&state), Settings { dark: true, backup: Backup { compress: true, ..Backup::default() }, ..Settings::default() });
         assert!(!state.language_chosen);
         assert!(Settings::read("dark = true").is_err(), "not JSON");
