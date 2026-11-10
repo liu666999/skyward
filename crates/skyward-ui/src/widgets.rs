@@ -1222,7 +1222,8 @@ pub fn caret_over(at: Rect, draw: impl FnOnce(&mut Canvas, f32, f32)) -> Caret {
 pub fn section(c: &mut Canvas, t: &Theme, f: &Fonts, prev_bottom: f32, label: &str) -> f32 {
     let m = &t.m;
     let ink_top = prev_bottom + m.section_label_top;
-    c.text_top(&f.label, label, m.margin + m.inner, ink_top, m.label_px, t.pal.section, None);
+    let label_spacing = m.dp(t.typography.map_or(0.0, |scale| scale.label_medium.letter_spacing_sp));
+    c.text_spaced(&f.label, label, m.margin + m.inner, ink_top, m.label_px, t.pal.section, None, label_spacing);
     prev_bottom + m.section_block
 }
 
@@ -1453,7 +1454,8 @@ fn draw_row(c: &mut Canvas, t: &Theme, f: &Fonts, r: &Row, lay: &Layout, top: f3
     let tx = card_x + lay.text_x;
     let color = r.tint.unwrap_or(tone.text);
     // A tag takes its room from the title's.
-    let tag_w = r.tag.map_or(0.0, |tag| c.text_width(&f.body, tag, m.dp(TAG_PX)) + m.dp(TAG_PAD * 2.0 + TAG_GAP));
+    let tag_spacing = m.dp(t.typography.map_or(0.0, |scale| scale.label_small.letter_spacing_sp));
+    let tag_w = r.tag.map_or(0.0, |tag| c.text_width_spaced(&f.body, tag, m.dp(TAG_PX), tag_spacing) + m.dp(TAG_PAD * 2.0 + TAG_GAP));
     let title_room = (lay.text_max - tag_w).max(0.0);
     let title_max = Some(title_room);
     let (tt, tb) = f.heading.ink(m.row_title_px);
@@ -1475,12 +1477,13 @@ fn draw_row(c: &mut Canvas, t: &Theme, f: &Fonts, r: &Row, lay: &Layout, top: f3
     if let Some(tag) = r.tag {
         let title_w = c.text_width(&f.heading, r.title, m.row_title_px).min(title_room);
         let x = tx + title_w + m.dp(TAG_GAP);
-        let w = c.text_width(&f.body, tag, m.dp(TAG_PX)) + m.dp(TAG_PAD * 2.0);
+        let w = c.text_width_spaced(&f.body, tag, m.dp(TAG_PX), tag_spacing) + m.dp(TAG_PAD * 2.0);
         let h = m.dp(TAG_H);
         let (stroke, radius) = (m.dp(TAG_STROKE), m.dp(t.shapes.extra_small * 0.875));
         c.fill_round_rect(x, title_cy - h / 2.0, w, h, radius, tone.value);
         c.fill_round_rect(x + stroke, title_cy - h / 2.0 + stroke, w - stroke * 2.0, h - stroke * 2.0, radius - stroke, tone.card);
-        c.text_center(&f.body, tag, x + w / 2.0, title_cy, m.dp(TAG_PX), tone.value);
+        let tag_text_w = c.text_width_spaced(&f.body, tag, m.dp(TAG_PX), tag_spacing);
+        c.text_spaced(&f.body, tag, x + (w - tag_text_w) / 2.0, title_cy + f.body.ink(m.dp(TAG_PX)).0 * -0.5, m.dp(TAG_PX), tone.value, None, tag_spacing);
     }
     match r.trail {
         Trail::None => {}
