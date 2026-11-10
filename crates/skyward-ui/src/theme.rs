@@ -474,6 +474,38 @@ mod tests {
     use super::*;
 
     #[test]
+    fn expressive_component_roles_follow_m3_semantics() {
+        for dark in [false, true] {
+            let theme = Theme::expressive(1200, 2608, 3.0, dark);
+            let colors = if dark { ColorScheme::dark() } else { ColorScheme::light() };
+            assert_eq!(theme.pal.on_accent, colors.on_primary);
+            assert_eq!(theme.pal.inverse_surface, colors.inverse_surface);
+            assert_eq!(theme.pal.inverse_text, colors.inverse_on_surface);
+            assert_eq!(theme.pal.backdrop, colors.surface_container_high);
+            assert_eq!(theme.pal.rim, colors.primary);
+            assert_eq!(theme.pal.chip_fill, colors.surface_container_highest);
+            assert_eq!(theme.pal.chip_rim, colors.outline_variant);
+            assert_eq!(theme.pal.keyboard_panel, colors.surface_dim);
+            assert_eq!(theme.pal.keyboard_key, colors.surface_container_lowest);
+            assert_eq!(theme.pal.keyboard_side, colors.surface_container_high);
+            assert_eq!(theme.pal.keyboard_ink, colors.on_surface);
+        }
+    }
+
+    #[test]
+    fn stock_component_roles_keep_the_original_light_and_dark_values() {
+        let light = Theme::light(1200, 2608, 3.0).pal;
+        let dark = Theme::dark(1200, 2608, 3.0).pal;
+        assert_eq!(light.on_accent, Rgba::rgb(255, 255, 255));
+        assert_eq!(light.chip_fill, Rgba::rgb(248, 248, 248));
+        assert_eq!(light.chip_rim, Rgba::rgb(255, 255, 255));
+        assert_eq!(light.keyboard_panel, Rgba::rgb(224, 226, 231));
+        assert_eq!(dark.chip_fill, Rgba::rgb(38, 38, 38));
+        assert_eq!(dark.chip_rim, Rgba::rgb(62, 62, 62));
+        assert_eq!(dark.keyboard_panel, Rgba::rgb(18, 18, 18));
+    }
+
+    #[test]
     fn expressive_palette_maps_semantic_roles_and_keeps_device_geometry() {
         let stock = Theme::light(1200, 2608, 3.0);
         let expressive = Theme::expressive(1200, 2608, 3.0, false);
