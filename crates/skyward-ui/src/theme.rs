@@ -487,6 +487,8 @@ mod tests {
             let theme = Theme::expressive(1200, 2608, 3.0, dark);
             let colors = if dark { ColorScheme::dark() } else { ColorScheme::light() };
             assert_eq!(theme.pal.on_accent, colors.on_primary);
+            assert_eq!(theme.pal.on_danger, colors.on_error);
+            assert_eq!(theme.pal.backdrop_ink, colors.on_surface);
             assert_eq!(theme.pal.inverse_surface, colors.inverse_surface);
             assert_eq!(theme.pal.inverse_text, colors.inverse_on_surface);
             assert_eq!(theme.pal.backdrop, colors.surface_container_high);
@@ -505,6 +507,10 @@ mod tests {
         let light = Theme::light(1200, 2608, 3.0).pal;
         let dark = Theme::dark(1200, 2608, 3.0).pal;
         assert_eq!(light.on_accent, Rgba::rgb(255, 255, 255));
+        assert_eq!(light.on_danger, Rgba::rgb(255, 255, 255));
+        assert_eq!(light.inverse_surface, Rgba::rgb(30, 30, 30).with_alpha(235));
+        assert_eq!(dark.inverse_surface, Rgba::rgb(30, 30, 30).with_alpha(235));
+        assert_eq!(dark.backdrop_ink, Rgba::rgb(255, 255, 255));
         assert_eq!(light.chip_fill, Rgba::rgb(248, 248, 248));
         assert_eq!(light.chip_rim, Rgba::rgb(255, 255, 255));
         assert_eq!(light.keyboard_panel, Rgba::rgb(224, 226, 231));
