@@ -114,6 +114,10 @@ The host preview runner now renders its existing core-page screenshot set twice:
 
 This is preview-generation support only. The screenshots have not yet been generated or visually reviewed in this environment, and this does not replace the full-page matrix, workspace tests, Android target build, or device verification.
 
+### Renderer regression coverage
+
+Host-side unit tests now exercise the glass panel's visible blur on a high-contrast checker backdrop, verify pixels outside the rounded panel are unchanged, verify rounded-corner clipping, exercise panels extending beyond the canvas bounds, and check that zero blur preserves a uniform backdrop. These tests are committed but have not yet been executed in this environment; they are not a substitute for measuring frame time and peak memory on the recovery target.
+
 ### Renderer primitive status
 
 A bounded rounded-panel renderer now exists as `Canvas::glass_round_rect`. It samples only the panel's padded bounds, performs two separable box-blur passes over that region, applies the material tint and a restrained top-biased edge highlight, and clips the result to the rounded rectangle. It requires complete, same-sized backdrop and target canvases.
