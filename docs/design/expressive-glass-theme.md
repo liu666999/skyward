@@ -111,3 +111,8 @@ with the repository's GPL-3.0-or-later distribution.
 ## Current status
 
 The M3E theme adapter, four-way selector, persistent choice, semantic palette mapping for shared controls, named shape/type metadata, compact component and popup shape-role mapping and contrast/regression tests are in place. The theme still needs a full preview pass across every page and a successful workspace CI run. M3E spatial/effects spring periods and short/medium reveal timings are now applied to existing navigation, search morph and press-feedback animations; device power/display timing and gesture thresholds remain unchanged. The current fork branch has no reported GitHub Actions run or commit status, and this editing environment has no Rust toolchain for a local build. Liquid Glass is not yet integrated into the active page components; no completed Liquid Glass implementation is claimed.
+
+
+### Expressive label letter spacing
+
+The canvas exposes additive spaced-text measurement and drawing methods. Existing text APIs retain zero additional spacing. The theme picker applies the M3 Expressive label-medium letter spacing only when an expressive type scale is active; stock theme captions continue to use their original spacing. Measurement, centering and truncation share the same spacing value.
