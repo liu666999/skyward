@@ -2902,7 +2902,7 @@ mod tests {
                 if dark { "dark" } else { "light" }
             );
             assert_eq!(
-                at(x + 8.0, top + h / 2.0),
+                at(x + 20.0, top + h / 2.0),
                 [t.pal.accent.r, t.pal.accent.g, t.pal.accent.b, t.pal.accent.a],
                 "the active track follows primary in {} mode",
                 if dark { "dark" } else { "light" }
@@ -2927,7 +2927,7 @@ mod tests {
             };
             assert_eq!(at(knob_x, top + h / 2.0), [t.pal.on_accent.r, t.pal.on_accent.g, t.pal.on_accent.b, t.pal.on_accent.a]);
             assert_eq!(at(x + w - 3.0, top + h / 2.0), [t.pal.track.r, t.pal.track.g, t.pal.track.b, t.pal.track.a]);
-            assert_eq!(at(x + 8.0, top + h / 2.0), [t.pal.accent.r, t.pal.accent.g, t.pal.accent.b, t.pal.accent.a]);
+            assert_eq!(at(x + 20.0, top + h / 2.0), [t.pal.accent.r, t.pal.accent.g, t.pal.accent.b, t.pal.accent.a]);
         }
     }
 
