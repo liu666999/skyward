@@ -1797,7 +1797,7 @@ pub fn confirm(c: &mut Canvas, t: &Theme, f: &Fonts, top: f32, label: &str, dang
     let s = k * 0.3;
     c.line(kcx - s * 0.5, kcy, kcx + s * 0.5, kcy, m.stroke, accent_ink);
     c.line(kcx + s * 0.5, kcy, kcx + s * 0.05, kcy - s * 0.45, m.stroke, accent_ink);
-    c.line(kcx + s * 0.5, kcy, kcx + s * 0.05, kcy + s * 0.45, m.stroke, Rgba::rgb(255, 255, 255));
+    c.line(kcx + s * 0.5, kcy, kcx + s * 0.05, kcy + s * 0.45, m.stroke, accent_ink);
     Rect::new(x, top, w, h)
 }
 
