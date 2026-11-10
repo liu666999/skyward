@@ -8388,14 +8388,19 @@ mod tests {
     }
 
     #[test]
-    fn theme_previews_switch_the_theme() {
+    fn theme_previews_switch_all_four_presets() {
         let (f, i) = (fonts(), info());
         let mut app = App::new(Screen::Settings, W, H, PPD);
-        tap(&mut app, &f, &i, Action::Theme { dark: true });
-        assert!(app.state.dark);
-        assert!(app.theme().dark);
-        tap(&mut app, &f, &i, Action::Theme { dark: false });
-        assert!(!app.state.dark);
+        tap(&mut app, &f, &i, Action::Theme { dark: true, expressive: true });
+        assert!(app.state.dark && app.state.expressive);
+        assert!(app.theme().dark && app.theme().typography.is_some());
+        tap(&mut app, &f, &i, Action::Theme { dark: false, expressive: false });
+        assert!(!app.state.dark && !app.state.expressive);
+        assert!(!app.theme().dark && app.theme().typography.is_none());
+        tap(&mut app, &f, &i, Action::Theme { dark: true, expressive: false });
+        assert!(app.state.dark && !app.state.expressive);
+        tap(&mut app, &f, &i, Action::Theme { dark: false, expressive: true });
+        assert!(!app.state.dark && app.state.expressive);
     }
 
     #[test]
