@@ -99,7 +99,7 @@ impl Tone {
     /// White on the accent, as the network joined stands out on the WLAN
     /// page: what is not the title at 60%, the round button at 18%.
     pub fn lit(t: &Theme) -> Tone {
-        let (accent, white) = (t.pal.accent, Rgba::rgb(255, 255, 255));
+        let (accent, white) = (t.pal.accent, t.pal.on_accent);
         let at = |k: f32| crate::color::mix(accent, white, k);
         Tone {
             card: accent,
@@ -699,8 +699,7 @@ pub fn back_cue_depth(t: &Theme, travel: f32) -> f32 {
 /// light blue, holding a white `<` once lifting there would go back. The
 /// `<` points back on either edge.
 pub fn back_cue(c: &mut Canvas, t: &Theme, from_left: bool, cy: f32, depth: f32, arrow: bool) {
-    const FILL: Rgba = Rgba::rgb(48, 48, 48);
-    const RIM: Rgba = Rgba::rgb(117, 170, 246);
+    let (fill_ink, rim_ink) = (t.pal.backdrop, t.pal.rim);
     let m = &t.m;
     if depth <= 0.0 {
         return;
@@ -727,16 +726,15 @@ pub fn back_cue(c: &mut Canvas, t: &Theme, from_left: bool, cy: f32, depth: f32,
     for y in (cy - reach).floor() as i32..(cy + reach).ceil() as i32 {
         let dy = y as f32 + 0.5 - cy;
         let fill = depth * (-(dy / sigma).powi(2)).exp() * taper(dy, fill_from);
-        span(c, y, fill + rim * taper(dy, rim_from), RIM);
-        span(c, y, fill, FILL);
+        span(c, y, fill + rim * taper(dy, rim_from), rim_ink);
+        span(c, y, fill, fill_ink);
     }
     if arrow {
         let (w, h, sw) = (m.dp(6.0), m.dp(12.7), m.dp(2.1));
         let cx = if from_left { 0.53 * depth } else { m.w as f32 - 0.53 * depth };
         let (tip, end) = (cx - w / 2.0 + sw / 2.0, cx + w / 2.0 - sw / 2.0);
-        let white = Rgba::rgb(255, 255, 255);
-        c.line(tip, cy, end, cy - h / 2.0 + sw / 2.0, sw, white);
-        c.line(tip, cy, end, cy + h / 2.0 - sw / 2.0, sw, white);
+        c.line(tip, cy, end, cy - h / 2.0 + sw / 2.0, sw, t.pal.text);
+        c.line(tip, cy, end, cy + h / 2.0 - sw / 2.0, sw, t.pal.text);
     }
 }
 
@@ -892,7 +890,7 @@ pub fn back_chip(t: &Theme) -> (Canvas, i32, i32) {
 /// Such a chip about the disc centred at (`cx`, `cy`) of radius `r`.
 fn chip(t: &Theme, (cx, cy, r): (f32, f32, f32)) -> (Canvas, i32, i32) {
     let m = &t.m;
-    let (fill, rim) = if t.dark { (Rgba::rgb(38, 38, 38), Rgba::rgb(62, 62, 62)) } else { (Rgba::rgb(248, 248, 248), Rgba::rgb(255, 255, 255)) };
+    let (fill, rim) = (t.pal.card, t.pal.rim);
     let spread = m.dp(7.0);
     let reach = r + spread;
     let (x0, y0) = ((cx - reach).floor() as i32 - 1, (cy - reach).floor() as i32 - 1);
@@ -921,8 +919,8 @@ pub fn toast(c: &mut Canvas, t: &Theme, f: &Fonts, text: &str) {
     let w = c.text_width(&f.heading, text, px) + m.dp(40.0);
     let h = m.dp(44.0);
     let (x, y) = ((m.w as f32 - w) / 2.0, m.h as f32 - m.dp(120.0));
-    c.fill_round_rect(x, y, w, h, h / 2.0, Rgba::rgb(30, 30, 30).with_alpha(235));
-    c.text_center(&f.heading, text, m.w as f32 / 2.0, y + h / 2.0, px, Rgba::rgb(255, 255, 255));
+    c.fill_round_rect(x, y, w, h, h / 2.0, t.pal.inverse_surface);
+    c.text_center(&f.heading, text, m.w as f32 / 2.0, y + h / 2.0, px, t.pal.inverse_text);
 }
 
 /// The home page's search bar in `r`, at `level` of its strength, without
@@ -1283,7 +1281,7 @@ pub fn dock_bar(t: &Theme, f: &Fonts, bg: Rgba, labels: &[&str]) -> (Canvas, Vec
     let mut rects = Vec::new();
     for (k, label) in labels.iter().enumerate() {
         let x = m.margin + k as f32 * (w + gap);
-        let (fill, ink) = if k + 1 == labels.len() { (t.pal.accent, Rgba::rgb(255, 255, 255)) } else { (t.pal.search, t.pal.text) };
+        let (fill, ink) = if k + 1 == labels.len() { (t.pal.accent, t.pal.on_accent) } else { (t.pal.search, t.pal.text) };
         c.fill_round_rect(x, pad, w, h, h / 2.0, fill);
         c.text_center(&f.heading, label, x + w / 2.0, pad + h / 2.0, m.row_title_px, ink);
         rects.push(Rect::new(x, pad, w, h));
@@ -1330,7 +1328,7 @@ pub fn button(c: &mut Canvas, t: &Theme, f: &Fonts, top: f32, label: &str) -> Re
     let m = &t.m;
     let (x, w, h) = (m.margin, m.w as f32 - m.margin * 2.0, m.dp(48.0));
     c.fill_round_rect(x, top, w, h, h / 2.0, t.pal.accent);
-    c.text_center(&f.heading, label, x + w / 2.0, top + h / 2.0, m.row_title_px, Rgba::rgb(255, 255, 255));
+    c.text_center(&f.heading, label, x + w / 2.0, top + h / 2.0, m.row_title_px, t.pal.on_accent);
     Rect::new(x, top, w, h)
 }
 
@@ -1699,7 +1697,7 @@ pub fn switch(c: &mut Canvas, t: &Theme, right: f32, cy: f32, on: bool) {
     let x = right - w;
     c.fill_round_rect(x, cy - h / 2.0, w, h, h / 2.0, if on { t.pal.accent } else { t.pal.switch_off });
     let kx = if on { right - h / 2.0 } else { x + h / 2.0 };
-    c.fill_circle(kx, cy, k / 2.0, Rgba::rgb(255, 255, 255));
+    c.fill_circle(kx, cy, k / 2.0, t.pal.on_accent);
 }
 
 /// The stock thick slider: a capsule track with the fill and a white knob
@@ -1710,7 +1708,7 @@ pub fn slider(c: &mut Canvas, t: &Theme, x: f32, top: f32, w: f32, value: f32) {
     c.fill_round_rect(x, top, w, h, h / 2.0, t.pal.track);
     let fw = (w * value.clamp(0.0, 1.0)).max(h);
     c.fill_round_rect(x, top, fw, h, h / 2.0, t.pal.accent);
-    c.fill_circle(x + fw - h / 2.0, top + h / 2.0, m.slider_knob / 2.0, Rgba::rgb(255, 255, 255));
+    c.fill_circle(x + fw - h / 2.0, top + h / 2.0, m.slider_knob / 2.0, t.pal.on_accent);
 }
 
 /// Where a slider card ends, its track, and the row under the slider.
@@ -1796,7 +1794,7 @@ pub fn confirm(c: &mut Canvas, t: &Theme, f: &Fonts, top: f32, label: &str, dang
     }
     c.fill_circle(kcx, kcy, k / 2.0, accent);
     let s = k * 0.3;
-    c.line(kcx - s * 0.5, kcy, kcx + s * 0.5, kcy, m.stroke, Rgba::rgb(255, 255, 255));
+    c.line(kcx - s * 0.5, kcy, kcx + s * 0.5, kcy, m.stroke, t.pal.on_accent);
     c.line(kcx + s * 0.5, kcy, kcx + s * 0.05, kcy - s * 0.45, m.stroke, Rgba::rgb(255, 255, 255));
     c.line(kcx + s * 0.5, kcy, kcx + s * 0.05, kcy + s * 0.45, m.stroke, Rgba::rgb(255, 255, 255));
     Rect::new(x, top, w, h)
@@ -2589,11 +2587,7 @@ pub fn keyboard_height(t: &Theme) -> f32 {
 pub fn keyboard(c: &mut Canvas, t: &Theme, f: &Fonts, l: Lang, top: f32, layer: Layer, pressed: Option<Cap>, enter: &str) -> Vec<(Rect, Cap)> {
     let m = &t.m;
     let w = m.w as f32;
-    let (panel, key, side, ink, shadow) = if t.dark {
-        (Rgba::rgb(18, 18, 18), Rgba::rgb(58, 58, 58), Rgba::rgb(38, 38, 38), Rgba::rgb(237, 237, 237), Rgba::rgb(0, 0, 0))
-    } else {
-        (Rgba::rgb(224, 226, 231), Rgba::rgb(255, 255, 255), Rgba::rgb(193, 198, 207), Rgba::rgb(0, 0, 0), Rgba::rgb(138, 141, 147))
-    };
+    let (panel, key, side, ink, shadow) = (t.pal.keyboard_panel, t.pal.keyboard_key, t.pal.keyboard_side, t.pal.keyboard_ink, t.pal.keyboard_shadow);
     c.fill_rect(0.0, top, w, keyboard_height(t), panel);
     let (pad, gx, gy, kh) = (m.dp(KEYBOARD_PAD_X_DP), m.dp(KEY_GAP_X_DP), m.dp(KEY_GAP_Y_DP), m.dp(KEY_H_DP));
     let kw = (w - pad * 2.0 - gx * 9.0) / 10.0;
@@ -2661,7 +2655,7 @@ pub fn keyboard(c: &mut Canvas, t: &Theme, f: &Fonts, l: Lang, top: f32, layer: 
                 c.text_center(&f.heading, &label.to_string(), cx, cy, glyph_px, ink);
             }
             Cap::Space => c.text_center(&f.body, l.pick(["空格", "空格", "Space"]), cx, cy, m.sub_px, ink),
-            Cap::Enter => c.text_center(&f.heading, enter, cx, cy, m.sub_px, Rgba::rgb(255, 255, 255)),
+            Cap::Enter => c.text_center(&f.heading, enter, cx, cy, m.sub_px, t.pal.on_accent),
             Cap::Show(Layer::Digits) => c.text_center(&f.heading, "123", cx, cy, m.sub_px, ink),
             Cap::Show(Layer::Symbols) => c.text_center(&f.heading, "#+=", cx, cy, m.sub_px, ink),
             Cap::Show(_) => c.text_center(&f.heading, "abc", cx, cy, m.sub_px, ink),
