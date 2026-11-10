@@ -108,6 +108,12 @@ with the repository's GPL-3.0-or-later distribution.
 - The Settings page now exposes four complete presets (stock light/dark and M3E light/dark), and the selected palette family is persisted with backward-compatible defaults.
 - Glass material parameters remain separate from the active renderer; backdrop sampling, clipped blur, and page/component wiring remain outstanding.
 
+### Core-page preview matrix
+
+The host preview runner now renders its existing core-page screenshot set twice: once with the stock palette and once with the M3 Expressive palette. Existing stock PNG filenames remain unchanged; M3E variants use a `-m3e` suffix so screenshot baselines and downstream tooling do not lose their established names. This expands the visual review surface without changing recovery runtime behaviour.
+
+This is preview-generation support only. The screenshots have not yet been generated or visually reviewed in this environment, and this does not replace the full-page matrix, workspace tests, Android target build, or device verification.
+
 ## Current status
 
 The M3E theme adapter, four-way selector, persistent choice, semantic palette mapping for shared controls, named shape/type metadata, compact component and popup shape-role mapping and contrast/regression tests are in place. The theme still needs a full preview pass across every page and a successful workspace CI run. M3E spatial/effects spring periods and short/medium reveal timings are now applied to existing navigation, search morph and press-feedback animations; device power/display timing and gesture thresholds remain unchanged. The current fork branch has no reported GitHub Actions run or commit status, and this editing environment has no Rust toolchain for a local build. Liquid Glass is not yet integrated into the active page components; no completed Liquid Glass implementation is claimed.
