@@ -2840,6 +2840,24 @@ mod tests {
     }
 
     #[test]
+    fn the_home_device_card_uses_glass_only_when_its_independent_switch_is_on() {
+        let mut glass_theme = Theme::light(400, 800, 1.0);
+        glass_theme.liquid_glass = true;
+        let flat_theme = Theme::light(400, 800, 1.0);
+        let fonts = crate::font::bundled();
+        let mut glass = Canvas::new(400, 800);
+        for (i, px) in glass.data.as_chunks_mut::<4>().0.iter_mut().enumerate() {
+            let value = if (i % 400 + i / 400) % 2 == 0 { 24 } else { 232 };
+            *px = [value, value, value, 255];
+        }
+        let mut flat = glass.clone();
+        device_card(&mut glass, &glass_theme, &fonts, 100.0, "Device", "Android", &[]);
+        device_card(&mut flat, &flat_theme, &fonts, 100.0, "Device", "Android", &[]);
+        assert_ne!(glass.data, flat.data, "the enabled material changes the card surface");
+        assert_eq!(&glass.data[..4], &flat.data[..4], "pixels outside the card are not touched");
+    }
+
+    #[test]
     fn theme_picker_draws_four_separate_preview_targets() {
         let t = Theme::light(720, 1600, 2.0);
         let f = crate::font::bundled();
