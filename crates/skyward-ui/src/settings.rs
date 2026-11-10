@@ -341,12 +341,21 @@ mod tests {
     fn the_expressive_theme_choice_round_trips_and_old_files_default_to_stock() {
         let mut state = State::default();
         state.expressive = true;
+        state.liquid_glass = true;
         let text = Settings::of(&state).text();
         let loaded = Settings::read(&text).unwrap();
         let mut restored = State::default();
         loaded.apply(&mut restored);
         assert!(restored.expressive);
         assert!(restored.liquid_glass, "the glass choice persists independently");
+
+        // Turning the palette family off must not change the glass choice.
+        state.expressive = false;
+        let stock = Settings::read(&Settings::of(&state).text()).unwrap();
+        let mut stock_restored = State::default();
+        stock.apply(&mut stock_restored);
+        assert!(!stock_restored.expressive);
+        assert!(stock_restored.liquid_glass);
 
         let old = Settings::read(r#"{ "dark": true }"#).unwrap();
         let mut legacy = State::default();
