@@ -286,6 +286,33 @@ mod tests {
         assert!(s.extra_large <= s.full);
     }
 
+    fn luminance(c: Rgba) -> f32 {
+        fn linear(v: u8) -> f32 {
+            let s = v as f32 / 255.0;
+            if s <= 0.04045 { s / 12.92 } else { ((s + 0.055) / 1.055).powf(2.4) }
+        }
+        0.2126 * linear(c.r) + 0.7152 * linear(c.g) + 0.0722 * linear(c.b)
+    }
+
+    fn contrast(a: Rgba, b: Rgba) -> f32 {
+        let (hi, lo) = {
+            let x = luminance(a);
+            let y = luminance(b);
+            (x.max(y), x.min(y))
+        };
+        (hi + 0.05) / (lo + 0.05)
+    }
+
+    #[test]
+    fn primary_text_and_controls_keep_readable_contrast_in_both_schemes() {
+        for colors in [ColorScheme::light(), ColorScheme::dark()] {
+            assert!(contrast(colors.on_surface, colors.surface) >= 7.0);
+            assert!(contrast(colors.on_primary, colors.primary) >= 4.5);
+            assert!(contrast(colors.on_primary_container, colors.primary_container) >= 4.5);
+            assert!(contrast(colors.on_error, colors.error) >= 4.5);
+        }
+    }
+
     #[test]
     fn typography_has_valid_line_heights() {
         let t = TypeScale::EXPRESSIVE;
