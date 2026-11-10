@@ -58,9 +58,9 @@ refraction or GPU shader parity.
 
 1. **Token foundation** — introduce renderer-neutral colour, shape, typography,
    motion and glass material tokens. Keep the current theme untouched.
-2. **Theme adapter** — add a persisted theme identifier while preserving old
-   settings files that only contain `dark`. Keep the existing light/dark mode
-   semantics and add the new theme as an opt-in choice.
+2. **Theme adapter** — persist the palette family alongside the existing
+   light/dark choice. Old settings files that only contain `dark` continue to
+   select the stock palette.
 3. **Component adapter** — map semantic roles to existing cards, buttons,
    switches, sliders, dialogs and navigation. Do not change actions or hitboxes.
 4. **Glass renderer** — snapshot only the clipped backdrop region, blur it with
@@ -97,18 +97,17 @@ with the repository's GPL-3.0-or-later distribution.
 
 - Settings now offers four independent previews: stock light, stock dark, M3 Expressive light, and M3 Expressive dark.
 - The selected palette is stored in the existing JSON settings file. Older files that do not contain the new `expressive` key continue to select the stock palette.
-- The M3E adapter maps semantic roles across cards, text, accents, avatars, status/battery inks, pressed states, popups and outlines. It applies a more expressive card radius while preserving existing layout and hit targets.
-- Typography roles and motion tokens remain defined as design tokens; they are not yet wired into the font and animation systems. Liquid-glass rendering is intentionally not being expanded in this phase: finish and validate theme selection, palette consistency and previews first.
+- The M3E adapter maps semantic roles across cards, text, accents, avatars, status/battery inks, pressed states, popups and outlines. Named expressive shape roles set card and preview radii while preserving row heights and touch targets.
+- M3E typography roles now feed existing row-title, body, label and preview-caption sizes. The motion scheme is attached to the selected theme as renderer-neutral metadata, but existing animation timings have not yet been migrated.
+- Theme preview selection updates both palette family and brightness together; switching from M3E to stock cannot leave the old palette active. Contrast tests cover primary text, primary controls, error controls and raised surfaces in both schemes.
+- Liquid-glass rendering is intentionally not being expanded in this phase: finish and validate theme selection, palette consistency and previews first.
 
 ## Implementation notes
 
-- `theme.rs` now exposes `Theme::expressive(w, h, px_per_dp, dark)`, adapting M3E semantic roles into the existing Skyward palette consumed by current widgets. Geometry, touch targets, battery inks and recovery actions remain inherited from the stock theme.
-- This is a first palette adapter, not yet a selectable persisted theme. Glass material parameters are still separate from the renderer; backdrop sampling, clipped blur, and page/component wiring remain outstanding.
+- `theme.rs` exposes `Theme::expressive(w, h, px_per_dp, dark)`, adapting M3E semantic roles into the existing Skyward palette consumed by current widgets. Device geometry, row heights, touch targets and recovery actions remain inherited from the stock theme.
+- The Settings page now exposes four complete presets (stock light/dark and M3E light/dark), and the selected palette family is persisted with backward-compatible defaults.
+- Glass material parameters remain separate from the active renderer; backdrop sampling, clipped blur, and page/component wiring remain outstanding.
 
 ## Current status
 
-The first token-only modules are in place. They are intentionally not wired into
-the active UI yet: the theme adapter, persistent selector, component migration,
-and backdrop renderer are subsequent steps. No claim of a completed visual
-Liquid Glass implementation should be made until those steps are previewed and
-tested.
+The M3E theme adapter, four-way selector, persistent choice, semantic palette mapping, named shape/type metadata and initial contrast/regression tests are in place. The theme still needs a full preview pass across every page and a successful workspace CI run. Motion tokens are exposed but not yet applied to animation timings. Liquid Glass is not yet integrated into the active page components; no completed Liquid Glass implementation is claimed.
