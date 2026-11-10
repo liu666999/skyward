@@ -7082,6 +7082,31 @@ mod tests {
     }
 
     #[test]
+    fn choosing_a_theme_preview_sets_both_palette_and_brightness() {
+        let mut app = App::new(Screen::Settings, W, H, PPD);
+        app.state.dark = true;
+        app.state.expressive = true;
+
+        app.act(Action::Theme { dark: false, expressive: false }, 0);
+        assert!(!app.state.dark && !app.state.expressive);
+        assert!(!app.theme().dark);
+
+        app.act(Action::Theme { dark: true, expressive: false }, 1);
+        assert!(app.state.dark && !app.state.expressive);
+        assert!(app.theme().dark);
+        assert!(app.theme().typography.is_none());
+
+        app.act(Action::Theme { dark: false, expressive: true }, 2);
+        assert!(!app.state.dark && app.state.expressive);
+        assert!(app.theme().typography.is_some());
+        assert!(!app.theme().dark);
+
+        app.act(Action::Theme { dark: true, expressive: true }, 3);
+        assert!(app.state.dark && app.state.expressive);
+        assert!(app.theme().dark);
+    }
+
+    #[test]
     fn a_page_drawn_a_band_at_a_time_is_the_page_drawn_whole() {
         let (f, i) = (fonts(), info());
         let state = State::default();
