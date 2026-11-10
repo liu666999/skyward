@@ -2750,7 +2750,9 @@ pub fn theme_picker(c: &mut Canvas, t: &Theme, f: &Fonts, l: Lang, top: f32, exp
     let slot_w = (m.w as f32 - m.margin * 2.0 - gap) / 2.0;
     let inset = m.dp(6.0);
     let tile = slot_w - inset * 2.0;
-    let label_px = m.dp(t.typography.map_or(13.5, |scale| scale.label_medium.size_sp));
+    let label_style = t.typography.map(|scale| scale.label_medium);
+    let label_px = m.dp(label_style.map_or(13.5, |style| style.size_sp));
+    let label_spacing = m.dp(label_style.map_or(0.0, |style| style.letter_spacing_sp));
     let (ink_top, ink_bottom) = f.heading.ink(label_px);
     let row_pitch = slot_w + m.dp(8.0);
     let caption_offset = slot_w + m.dp(9.0) - ink_top;
@@ -2774,10 +2776,10 @@ pub fn theme_picker(c: &mut Canvas, t: &Theme, f: &Fonts, l: Lang, top: f32, exp
         }
         theme_tile(c, t, sx + inset, sy + inset, tile, tile, dark, m3e);
         let label = l.pick(label);
-        let width = c.text_width(&f.heading, label, label_px);
+        let width = c.text_width_spaced(&f.heading, label, label_px, label_spacing);
         let caption_y = sy + caption_offset;
         let color = if on { t.pal.accent } else { t.pal.info };
-        c.text(&f.heading, label, sx + (slot_w - width) / 2.0, caption_y, label_px, color, None);
+        c.text_spaced(&f.heading, label, sx + (slot_w - width) / 2.0, caption_y, label_px, color, None, label_spacing);
         rects.push(Rect::new(sx, sy, slot_w, caption_offset + ink_bottom));
     }
     Block { bottom, rows: rects }
