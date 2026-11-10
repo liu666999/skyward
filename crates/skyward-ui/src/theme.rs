@@ -251,6 +251,7 @@ impl Theme {
         theme.m.row_title_px = theme.m.dp(TypeScale::EXPRESSIVE.title_medium.size_sp);
         theme.m.account_title_px = theme.m.dp(TypeScale::EXPRESSIVE.title_medium.size_sp);
         theme.m.sub_px = theme.m.dp(TypeScale::EXPRESSIVE.body_medium.size_sp);
+        theme.m.sub_pitch = theme.m.dp(TypeScale::EXPRESSIVE.body_medium.line_height_sp);
         theme.m.label_px = theme.m.dp(TypeScale::EXPRESSIVE.label_medium.size_sp);
         theme.m.badge_px = theme.m.dp(TypeScale::EXPRESSIVE.label_small.size_sp);
         theme.hero.card = if dark { c.surface_container_high.with_alpha(230) } else { c.surface_container_lowest };
@@ -534,6 +535,8 @@ mod tests {
         assert_eq!(expressive.shapes, ShapeScale::EXPRESSIVE);
         assert!(expressive.typography.is_some());
         assert!(expressive.motion.is_some());
+        assert_eq!(expressive.m.sub_pitch, expressive.m.dp(TypeScale::EXPRESSIVE.body_medium.line_height_sp));
+        assert_eq!(stock.m.sub_pitch, stock.m.dp(18.7));
         assert!(stock.typography.is_none());
         let dark = Theme::expressive(1200, 2608, 3.0, true);
         assert!(dark.dark);
