@@ -2802,6 +2802,24 @@ mod tests {
     }
 
     #[test]
+    fn theme_picker_draws_four_separate_preview_targets() {
+        let t = Theme::light(720, 1600, 2.0);
+        let f = crate::font::bundled();
+        let mut c = Canvas::new(720, 1600);
+        c.clear(t.pal.bg);
+        let block = theme_picker(&mut c, &t, &f, Lang::Hans, 80.0, false);
+        assert_eq!(block.rows.len(), 4);
+        assert!(block.bottom < c.h as f32);
+        for (i, rect) in block.rows.iter().enumerate() {
+            assert!(rect.w > 0.0 && rect.h > 0.0);
+            assert!(block.rows[..i].iter().all(|other| {
+                rect.x + rect.w <= other.x || other.x + other.w <= rect.x
+                    || rect.y + rect.h <= other.y || other.y + other.h <= rect.y
+            }), "preview targets do not overlap");
+        }
+    }
+
+    #[test]
     fn the_wlan_fan_lights_as_many_arcs_as_the_signal_and_the_padlock_stands_as_asked() {
         let (black, white, grey) = (Rgba::rgb(0, 0, 0), Rgba::rgb(255, 255, 255), Rgba::rgb(0, 0, 255));
         let mut c = Canvas::new(400, 400);
