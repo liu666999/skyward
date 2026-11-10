@@ -200,7 +200,7 @@ fn main() -> Result<()> {
                 app.state.liquid_glass = *liquid_glass;
                 app.state.data = data;
                 app.state.pattern = pattern.to_vec();
-                let suffix = match (expressive, liquid_glass) {
+                let suffix = match (expressive, *liquid_glass) {
                     (false, false) => "",
                     (true, false) => "-m3e",
                     (false, true) => "-glass",
