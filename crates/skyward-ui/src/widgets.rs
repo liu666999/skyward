@@ -733,8 +733,8 @@ pub fn back_cue(c: &mut Canvas, t: &Theme, from_left: bool, cy: f32, depth: f32,
         let (w, h, sw) = (m.dp(6.0), m.dp(12.7), m.dp(2.1));
         let cx = if from_left { 0.53 * depth } else { m.w as f32 - 0.53 * depth };
         let (tip, end) = (cx - w / 2.0 + sw / 2.0, cx + w / 2.0 - sw / 2.0);
-        c.line(tip, cy, end, cy - h / 2.0 + sw / 2.0, sw, t.pal.text);
-        c.line(tip, cy, end, cy + h / 2.0 - sw / 2.0, sw, t.pal.text);
+        c.line(tip, cy, end, cy - h / 2.0 + sw / 2.0, sw, t.pal.backdrop_ink);
+        c.line(tip, cy, end, cy + h / 2.0 - sw / 2.0, sw, t.pal.backdrop_ink);
     }
 }
 
