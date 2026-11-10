@@ -2501,26 +2501,26 @@ struct RowPress {
 
 impl RowPress {
     /// How dark the row is at `now`, from 0 to 1.
-    fn level(&self, now: u64) -> f32 {
+    fn level(&self, now: u64, period: f32) -> f32 {
         if now < self.rise {
             return 0.0;
         }
-        let up = |t: u64| motion::settle(t - self.rise, ROW_PRESS_PERIOD);
+        let up = |t: u64| motion::settle(t - self.rise, period);
         match self.fall {
-            Some(fall) if now >= fall => up(fall) * (1.0 - motion::settle(now - fall, ROW_PRESS_PERIOD)),
+            Some(fall) if now >= fall => up(fall) * (1.0 - motion::settle(now - fall, period)),
             _ => up(now),
         }
     }
 
     /// Whether it has faded back after being let go.
-    fn gone(&self, now: u64) -> bool {
-        self.fall.is_some_and(|fall| now >= fall && motion::settle(now - fall, ROW_PRESS_PERIOD) == 1.0)
+    fn gone(&self, now: u64, period: f32) -> bool {
+        self.fall.is_some_and(|fall| now >= fall && motion::settle(now - fall, period) == 1.0)
     }
 
     /// Whether it is darkening or fading back at `now`.
-    fn changing(&self, now: u64) -> bool {
-        let dark = self.fall.is_none() && now >= self.rise && motion::settle(now - self.rise, ROW_PRESS_PERIOD) == 1.0;
-        now >= self.rise && !dark && !self.gone(now)
+    fn changing(&self, now: u64, period: f32) -> bool {
+        let dark = self.fall.is_none() && now >= self.rise && motion::settle(now - self.rise, period) == 1.0;
+        now >= self.rise && !dark && !self.gone(now, period)
     }
 
     /// The finger lifted at `now`: a row that had not shown pressed yet
@@ -2851,7 +2851,10 @@ impl App {
                 || self.bar.moving(now)
                 || self.morph.is_some()
                 || self.turn.is_some()
-                || self.row_press.is_some_and(|p| p.changing(now) || p.gone(now))
+                || self.row_press.is_some_and(|p| {
+                    let period = self.theme().motion.map_or(ROW_PRESS_PERIOD, |m| m.effects_spring_period);
+                    p.changing(now, period) || p.gone(now, period)
+                })
                 || self.glowing());
         // The content going dark or coming up, and the charging screen's
         // tide, move a frame at a time while the panel is lit.
@@ -2971,12 +2974,13 @@ impl App {
         if self.blink_at(now).is_some_and(|(on, _)| on != self.caret_shown) || self.morph.is_some() || self.turn.is_some() {
             self.dirty = true;
         }
+        let row_press_period = self.theme().motion.map_or(ROW_PRESS_PERIOD, |m| m.effects_spring_period);
         if let Some(p) = self.row_press {
-            if p.gone(now) {
+            if p.gone(now, row_press_period) {
                 self.row_press = None;
                 self.row_art = None;
                 self.dirty = true;
-            } else if p.changing(now) {
+            } else if p.changing(now, row_press_period) {
                 self.dirty = true;
             }
         }
@@ -4347,7 +4351,7 @@ impl App {
             title: self.title.level(now),
             light: self.light(offset),
             caret: caret_on,
-            row: self.row_press.map_or(0.0, |p| p.level(now)),
+            row: self.row_press.map_or(0.0, |p| p.level(now, t.motion.map_or(ROW_PRESS_PERIOD, |m| m.effects_spring_period))),
             pressing: self.pressing(),
         };
         match slide {
@@ -4566,12 +4570,13 @@ impl App {
     /// behind, and how dark that is; nothing once the slide is over. See
     /// [`Turn`].
     fn slid(&mut self, now: u64) -> Option<(i32, i32, f32)> {
+        let spatial_period = self.theme().motion.map_or(OPEN_PERIOD, |m| m.spatial_spring_period);
         let turn = self.turn.as_mut()?;
         let spring = *turn.spring.get_or_insert_with(|| {
             if turn.back {
-                Spring::new(now, -1000.0, 0.0, BACK_PERIOD)
+                Spring::new(now, -1000.0, 0.0, spatial_period)
             } else {
-                Spring::new(now, 1000.0, -OPEN_SPEED * 1000.0, OPEN_PERIOD)
+                Spring::new(now, 1000.0, -OPEN_SPEED * 1000.0, spatial_period)
             }
         });
         let (x, done) = spring.at(now);
@@ -4773,7 +4778,7 @@ impl App {
         let keyboard = if into { None } else { self.frame.as_ref().map(|fr| keyboard_strip(&self.theme(), fr)) };
         self.morph = Some(Morph {
             into,
-            spring: Spring::new(now, (q - target) * 1000.0, speed * 1000.0, MORPH_PERIOD),
+            spring: Spring::new(now, (q - target) * 1000.0, speed * 1000.0, self.theme().motion.map_or(MORPH_PERIOD, |m| m.effects_spring_period)),
             start: now,
             scroll: self.stack[home].1,
             keyboard,
@@ -6874,7 +6879,8 @@ impl App {
         let at = self.top().1;
         let rest = fr.settle(at).min(self.max_scroll());
         if rest != at {
-            self.seek = Some((rest, Spring::new(now, at - rest, 0.0, FOLD_PERIOD)));
+            let period = self.theme().motion.map_or(FOLD_PERIOD, |m| m.spatial_spring_period);
+            self.seek = Some((rest, Spring::new(now, at - rest, 0.0, period)));
             self.dirty = true;
         }
     }
@@ -6883,7 +6889,8 @@ impl App {
     fn seek_to(&mut self, target: f32, now: u64) {
         let at = self.top().1;
         self.fling = None;
-        self.seek = (target != at).then(|| (target, Spring::new(now, at - target, 0.0, SEEK_PERIOD)));
+        let period = self.theme().motion.map_or(SEEK_PERIOD, |m| m.spatial_spring_period);
+        self.seek = (target != at).then(|| (target, Spring::new(now, at - target, 0.0, period)));
         self.dirty = true;
     }
 
