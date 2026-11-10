@@ -325,7 +325,7 @@ fn main() -> Result<()> {
             app.state.dark = dark;
             app.state.expressive = expressive;
             app.set_mounts(Ok(sample_mounts(unmounted)));
-            if let Some(failure) = failure {
+            if let Some(failure) = failure.clone() {
                 app.mount_failed(failure);
             }
             let suffix = if expressive { "-m3e" } else { "" };
