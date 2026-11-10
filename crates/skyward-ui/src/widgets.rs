@@ -1626,7 +1626,6 @@ const TAG_H: f32 = 13.6;
 const TAG_PAD: f32 = 4.0;
 const TAG_GAP: f32 = 5.0;
 const TAG_STROKE: f32 = 0.7;
-const TAG_RADIUS: f32 = 3.5;
 const LOCK_W: f32 = 10.0;
 const LOCK_H: f32 = 11.5;
 const LOCK_GAP: f32 = 16.0;
