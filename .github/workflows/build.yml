@@ -71,6 +71,11 @@ jobs:
           test -s target/theme-preview/110-files-types-dark-m3e.png
           test -s target/theme-preview/62-files-empty-light-m3e.png
           test -s target/theme-preview/63-files-unreadable-dark-m3e.png
+          # Destructive confirmation tracks must keep their container text
+          # legible in both light and dark M3E schemes.
+          test -s target/theme-preview/07-wipe-light-m3e.png
+          test -s target/theme-preview/91-wipe-light-all-m3e.png
+          test -s target/theme-preview/48-restore-backup-dark-deleting-m3e.png
       - name: Lint what runs on the phone
         run: cargo ndk -t arm64-v8a --platform 30 clippy --locked -p skyward -p skyward-install -p skyward-systems -p skyward-system-init -- -D warnings
 
