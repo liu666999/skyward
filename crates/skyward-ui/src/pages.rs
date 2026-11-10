@@ -998,7 +998,7 @@ fn status_ink(t: &Theme, stock: Rgba) -> Rgba {
     else if stock == RED { t.pal.danger }
     else if stock == ORANGE { t.pal.warning_ink }
     else if stock == BLUE { t.pal.accent }
-    else if stock == PURPLE { t.pal.outline }
+    else if stock == PURPLE { t.pal.tertiary_ink }
     else { t.pal.subtitle }
 }
 
@@ -4042,6 +4042,7 @@ mod tests {
             assert_eq!(status_ink(t, GREEN), t.pal.success_ink);
             assert_eq!(status_ink(t, RED), t.pal.danger);
             assert_eq!(status_ink(t, ORANGE), t.pal.warning_ink);
+            assert_eq!(status_ink(t, PURPLE), t.pal.tertiary_ink);
             assert_eq!(status_ink(t, SLATE), t.pal.subtitle);
         }
         let stock_light = Theme::light(1440, 3200, 3.5);
@@ -4050,6 +4051,7 @@ mod tests {
             assert_eq!(status_ink(t, GREEN), GREEN);
             assert_eq!(status_ink(t, RED), RED);
             assert_eq!(status_ink(t, ORANGE), ORANGE);
+            assert_eq!(status_ink(t, PURPLE), PURPLE);
             assert_eq!(status_ink(t, SLATE), SLATE);
         }
     }
