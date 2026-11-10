@@ -1783,6 +1783,7 @@ pub fn slider_card(c: &mut Canvas, t: &Theme, f: &Fonts, top: f32, caption: Capt
 pub fn confirm(c: &mut Canvas, t: &Theme, f: &Fonts, top: f32, label: &str, danger: bool, progress: f32) -> Rect {
     let m = &t.m;
     let accent = if danger { t.pal.danger } else { t.pal.accent };
+    let accent_ink = if danger { t.pal.on_danger } else { t.pal.on_accent };
     let (x, w, h) = (m.margin, m.w as f32 - m.margin * 2.0, m.dp(56.0));
     c.fill_round_rect(x, top, w, h, h / 2.0, if danger { t.pal.danger_soft } else { t.pal.badge });
     c.text_center(&f.heading, label, x + w / 2.0 + h / 4.0, top + h / 2.0, m.row_title_px, accent);
@@ -1794,8 +1795,8 @@ pub fn confirm(c: &mut Canvas, t: &Theme, f: &Fonts, top: f32, label: &str, dang
     }
     c.fill_circle(kcx, kcy, k / 2.0, accent);
     let s = k * 0.3;
-    c.line(kcx - s * 0.5, kcy, kcx + s * 0.5, kcy, m.stroke, t.pal.on_accent);
-    c.line(kcx + s * 0.5, kcy, kcx + s * 0.05, kcy - s * 0.45, m.stroke, t.pal.on_accent);
+    c.line(kcx - s * 0.5, kcy, kcx + s * 0.5, kcy, m.stroke, accent_ink);
+    c.line(kcx + s * 0.5, kcy, kcx + s * 0.05, kcy - s * 0.45, m.stroke, accent_ink);
     c.line(kcx + s * 0.5, kcy, kcx + s * 0.05, kcy + s * 0.45, m.stroke, Rgba::rgb(255, 255, 255));
     Rect::new(x, top, w, h)
 }
