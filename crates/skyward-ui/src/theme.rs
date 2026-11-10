@@ -1,6 +1,6 @@
 use crate::color::{over, Rgba};
 use crate::glow::{self, Glow};
-use crate::expressive::{self, ColorScheme};
+use crate::expressive::{self, ColorScheme, MotionScheme, ShapeScale, TypeScale};
 
 #[derive(Clone, Copy)]
 pub struct Palette {
@@ -153,17 +153,22 @@ pub struct Theme {
     pub pal: Palette,
     pub hero: Hero,
     pub m: Metrics,
+    pub shapes: ShapeScale,
+    /// Present only when the M3 Expressive typography scale is selected.
+    pub typography: Option<TypeScale>,
+    /// Present only when the M3 Expressive motion scheme is selected.
+    pub motion: Option<MotionScheme>,
     pub dark: bool,
 }
 
 impl Theme {
     /// `px_per_dp` is the panel density over 160, e.g. 3.0 at 480 dpi.
     pub fn light(w: u32, h: u32, px_per_dp: f32) -> Self {
-        Theme { pal: LIGHT, hero: LIGHT_HERO, m: metrics(w, h, px_per_dp), dark: false }
+        Theme { pal: LIGHT, hero: LIGHT_HERO, m: metrics(w, h, px_per_dp), shapes: ShapeScale::STOCK, typography: None, motion: None, dark: false }
     }
 
     pub fn dark(w: u32, h: u32, px_per_dp: f32) -> Self {
-        Theme { pal: DARK, hero: DARK_HERO, m: metrics(w, h, px_per_dp), dark: true }
+        Theme { pal: DARK, hero: DARK_HERO, m: metrics(w, h, px_per_dp), shapes: ShapeScale::STOCK, typography: None, motion: None, dark: true }
     }
 
     /// Material 3 Expressive palette adapted to Skyward's existing widgets.
@@ -205,7 +210,16 @@ impl Theme {
             shadow: c.shadow.with_alpha(if dark { 90 } else { 36 }),
             ..theme.pal
         };
-        theme.m.card_radius = theme.m.dp(26.0);
+        theme.shapes = ShapeScale::EXPRESSIVE;
+        theme.typography = Some(TypeScale::EXPRESSIVE);
+        theme.motion = Some(MotionScheme::EXPRESSIVE);
+        theme.m.card_radius = theme.m.dp(theme.shapes.extra_large);
+        // Apply the M3 type roles to existing layout slots without changing
+        // row heights or touch targets.
+        theme.m.row_title_px = theme.m.dp(TypeScale::EXPRESSIVE.title_medium.size_sp);
+        theme.m.sub_px = theme.m.dp(TypeScale::EXPRESSIVE.body_medium.size_sp);
+        theme.m.label_px = theme.m.dp(TypeScale::EXPRESSIVE.label_medium.size_sp);
+        theme.m.status_px = theme.m.dp(TypeScale::EXPRESSIVE.label_small.size_sp);
         theme.hero.card = if dark { c.surface_container_high.with_alpha(230) } else { c.surface_container_lowest };
         theme.hero.title = c.on_surface;
         theme.hero.value = c.on_surface_variant;
@@ -417,6 +431,11 @@ mod tests {
         assert_eq!(expressive.pal.avatar_glyph, roles.on_primary_container);
         assert_eq!((expressive.m.w, expressive.m.h), (stock.m.w, stock.m.h));
         assert!(expressive.m.card_radius > stock.m.card_radius);
+        assert_eq!(stock.shapes, ShapeScale::STOCK);
+        assert_eq!(expressive.shapes, ShapeScale::EXPRESSIVE);
+        assert!(expressive.typography.is_some());
+        assert!(expressive.motion.is_some());
+        assert!(stock.typography.is_none());
         let dark = Theme::expressive(1200, 2608, 3.0, true);
         assert!(dark.dark);
         assert_eq!(dark.pal.bg, ColorScheme::dark().background);
