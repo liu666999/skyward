@@ -501,6 +501,8 @@ mod tests {
             let theme = Theme::expressive(1200, 2608, 3.0, dark);
             let colors = if dark { ColorScheme::dark() } else { ColorScheme::light() };
             assert_eq!(theme.pal.on_accent, colors.on_primary);
+            assert_eq!(theme.pal.badge_ink, colors.on_primary_container);
+            assert_eq!(theme.pal.danger_soft_ink, colors.on_error_container);
             assert_eq!(theme.pal.on_danger, colors.on_error);
             assert_eq!(theme.pal.backdrop_ink, colors.on_surface);
             assert_eq!(theme.pal.inverse_surface, colors.inverse_surface);
@@ -521,6 +523,10 @@ mod tests {
         let light = Theme::light(1200, 2608, 3.0).pal;
         let dark = Theme::dark(1200, 2608, 3.0).pal;
         assert_eq!(light.on_accent, Rgba::rgb(255, 255, 255));
+        assert_eq!(light.badge_ink, Rgba::rgb(74, 128, 247));
+        assert_eq!(light.danger_soft_ink, Rgba::rgb(230, 66, 60));
+        assert_eq!(dark.badge_ink, Rgba::rgb(84, 136, 248));
+        assert_eq!(dark.danger_soft_ink, Rgba::rgb(255, 92, 84));
         assert_eq!(light.on_danger, Rgba::rgb(255, 255, 255));
         assert_eq!(light.inverse_surface, Rgba::rgb(30, 30, 30).with_alpha(235));
         assert_eq!(dark.inverse_surface, Rgba::rgb(30, 30, 30).with_alpha(235));
