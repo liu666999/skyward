@@ -43,10 +43,18 @@ jobs:
           test -s target/theme-preview/02-home-light-m3e.png
           test -s target/theme-preview/02-home-light-glass.png
           test -s target/theme-preview/02-home-light-m3e-glass.png
+          test -s target/theme-preview/03-home-dark-update-pending.png
+          test -s target/theme-preview/03-home-dark-update-pending-m3e.png
+          test -s target/theme-preview/03-home-dark-update-pending-glass.png
+          test -s target/theme-preview/03-home-dark-update-pending-m3e-glass.png
           test -s target/theme-preview/04-settings-light.png
           test -s target/theme-preview/04-settings-light-m3e.png
           test -s target/theme-preview/04-settings-light-glass.png
           test -s target/theme-preview/04-settings-light-m3e-glass.png
+          test -s target/theme-preview/05-settings-dark.png
+          test -s target/theme-preview/05-settings-dark-m3e.png
+          test -s target/theme-preview/05-settings-dark-glass.png
+          test -s target/theme-preview/05-settings-dark-m3e-glass.png
       - name: Lint what runs on the phone
         run: cargo ndk -t arm64-v8a --platform 30 clippy --locked -p skyward -p skyward-install -p skyward-systems -p skyward-system-init -- -D warnings
 
