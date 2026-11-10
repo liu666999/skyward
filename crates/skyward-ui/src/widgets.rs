@@ -2717,7 +2717,7 @@ fn theme_tile(c: &mut Canvas, t: &Theme, x: f32, y: f32, w: f32, h: f32, dark: b
         (top, bottom, if dark { Rgba::rgb(0, 0, 0).with_alpha(51) } else { Rgba::rgb(255, 255, 255).with_alpha(51) })
     };
     let grad = |py: f32| mix(top, bottom, (py - y) / h);
-    c.fill_round_rect_graded(x, y, w, h, t.m.dp(if expressive { 26.0 } else { 20.0 }), &grad);
+    c.fill_round_rect_graded(x, y, w, h, t.m.dp(if expressive { crate::expressive::ShapeScale::EXPRESSIVE.extra_large } else { crate::expressive::ShapeScale::STOCK.extra_large }), &grad);
     let lw = h * 0.027;
     for (c0, c1) in [(0.218f32, 0.472f32), (0.523, 0.779)] {
         let sy = y + h * c0;
@@ -2762,7 +2762,7 @@ pub fn theme_picker(c: &mut Canvas, t: &Theme, f: &Fonts, l: Lang, top: f32, exp
         let on = t.dark == dark && expressive == m3e;
         if on {
             let ring = m.dp(3.0);
-            c.stroke_round_rect(sx + ring / 2.0, sy + ring / 2.0, slot_w - ring, slot_w - ring, m.dp(26.0) - ring / 2.0, ring, t.pal.accent);
+            c.stroke_round_rect(sx + ring / 2.0, sy + ring / 2.0, slot_w - ring, slot_w - ring, m.dp(crate::expressive::ShapeScale::EXPRESSIVE.extra_large) - ring / 2.0, ring, t.pal.accent);
         }
         theme_tile(c, t, sx + inset, sy + inset, tile, tile, dark, m3e);
         let label = l.pick(label);
