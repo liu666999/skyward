@@ -42,6 +42,9 @@ pub struct Palette {
     pub danger: Rgba,
     pub on_danger: Rgba,
     pub danger_soft: Rgba,
+    /// Foreground roles for the soft primary and error containers.
+    pub badge_ink: Rgba,
+    pub danger_soft_ink: Rgba,
     /// Titles and values on the parameters page and captions inside cards, a
     /// step softer than `text`.
     pub info: Rgba,
@@ -205,6 +208,8 @@ impl Theme {
             chevron: c.outline,
             accent: c.primary,
             on_accent: c.on_primary,
+            badge_ink: c.on_primary_container,
+            danger_soft_ink: c.on_error_container,
             inverse_surface: c.inverse_surface,
             inverse_text: c.inverse_on_surface,
             backdrop: c.surface_container_high,
@@ -379,6 +384,8 @@ const LIGHT: Palette = Palette {
     danger: Rgba::rgb(230, 66, 60),
     on_danger: Rgba::rgb(255, 255, 255),
     danger_soft: Rgba::rgb(253, 236, 235),
+    badge_ink: Rgba::rgb(74, 128, 247),
+    danger_soft_ink: Rgba::rgb(230, 66, 60),
     info: Rgba::rgb(51, 51, 51),
     outline: Rgba::rgb(102, 102, 102),
     spec_label: Rgba::rgb(127, 127, 127),
@@ -444,6 +451,8 @@ const DARK: Palette = Palette {
     danger: Rgba::rgb(255, 92, 84),
     on_danger: Rgba::rgb(255, 255, 255),
     danger_soft: Rgba::rgb(52, 24, 24),
+    badge_ink: Rgba::rgb(84, 136, 248),
+    danger_soft_ink: Rgba::rgb(255, 92, 84),
     info: Rgba::rgb(214, 214, 214),
     outline: Rgba::rgb(140, 140, 140),
     spec_label: Rgba::rgb(128, 128, 128),
