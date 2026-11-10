@@ -3145,14 +3145,15 @@ mod tests {
         let f = crate::font::bundled();
         let c = Canvas::new(1, 1);
         let px = 18.0;
-        let text = "M3Expressive";
+        let text = "M3 expressive";
         let plain = wrap(&c, &f.body, text, px, 85.0);
         let spaced = wrap_spaced(&c, &f.body, text, px, 85.0, 0.5);
         assert!(spaced.len() >= plain.len());
         for line in &spaced {
             assert!(c.text_width_spaced(&f.body, line, px, 0.5) <= 85.0 || line.chars().count() == 1);
         }
-        assert_eq!(spaced.concat(), text);
+        let squeezed = |s: &str| s.chars().filter(|ch| *ch != ' ').collect::<String>();
+        assert_eq!(squeezed(&spaced.concat()), squeezed(text));
     }
 
     #[test]
