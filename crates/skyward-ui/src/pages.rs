@@ -353,8 +353,8 @@ pub fn settings(cx: &Ctx) -> Frame {
     let mut c = long_page(cx);
     let mut out = Vec::new();
     let top = t.m.content_top;
-    let themes = widgets::theme_picker(&mut c, t, f, l, top + t.m.dp(8.9));
-    out.extend(hits(&themes.rows, &[Action::Theme { dark: false }, Action::Theme { dark: true }]));
+    let themes = widgets::theme_picker(&mut c, t, f, l, top + t.m.dp(8.9), s.expressive);
+    out.extend(hits(&themes.rows, &[Action::Theme { dark: false }, Action::Theme { dark: true }, Action::Expressive(false), Action::Expressive(true)]));
     let mut y = widgets::section(&mut c, t, f, themes.bottom, l.pick(["亮度", "亮度", "Brightness"]));
     let off = fmt::screen_off(l, SCREEN_OFF[s.screen_off]);
     let below = Row::new(l.pick(SCREEN_TIMEOUT)).trail(Trail::Value(&off));
