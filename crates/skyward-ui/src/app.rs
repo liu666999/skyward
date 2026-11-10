@@ -1171,6 +1171,8 @@ pub enum Action {
     OpenData,
     Back,
     Theme { dark: bool },
+    /// Choose the Material 3 Expressive palette while retaining the light/dark choice.
+    Expressive(bool),
     Toggle(Switch),
     RebootTarget(usize),
     /// Choose or leave out what the wipe page erases.
@@ -1581,6 +1583,8 @@ pub struct State {
     /// start, where otherwise it is the one the system names.
     pub language_chosen: bool,
     pub dark: bool,
+    /// Whether the Material 3 Expressive palette is selected instead of stock.
+    pub expressive: bool,
     pub brightness: f32,
     /// How long the screen stays on with nothing touched, by its place in
     /// [`SCREEN_OFF`].
@@ -1758,6 +1762,7 @@ impl Default for State {
             lang: Lang::Hans,
             language_chosen: false,
             dark: false,
+            expressive: false,
             brightness: SLIDER_START,
             // Two minutes.
             screen_off: 3,
@@ -2804,7 +2809,9 @@ impl App {
     }
 
     pub fn theme(&self) -> Theme {
-        if self.state.dark {
+        if self.state.expressive {
+            Theme::expressive(self.w, self.h, self.px_per_dp, self.state.dark)
+        } else if self.state.dark {
             Theme::dark(self.w, self.h, self.px_per_dp)
         } else {
             Theme::light(self.w, self.h, self.px_per_dp)
@@ -5151,6 +5158,12 @@ impl App {
             Action::Theme { dark } => {
                 if self.state.dark != dark {
                     self.state.dark = dark;
+                    self.refresh();
+                }
+            }
+            Action::Expressive(expressive) => {
+                if self.state.expressive != expressive {
+                    self.state.expressive = expressive;
                     self.refresh();
                 }
             }
