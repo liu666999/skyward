@@ -2996,7 +2996,8 @@ impl App {
                 // The glide ran into an end: the speed it had left throws
                 // the page past it, and it springs back.
                 let speed = fling.velocity(now);
-                let period = if speed.abs() <= self.theme().m.dp(HARD_BOUNCE_DP) { 0.4 } else { 0.55 };
+                let base_period = self.theme().motion.map_or(0.4, |m| m.spatial_spring_period);
+                let period = if speed.abs() <= self.theme().m.dp(HARD_BOUNCE_DP) { base_period } else { base_period * 1.375 };
                 self.bounce = Some(Spring::new(now, 0.0, speed, period));
                 self.fling = None;
             } else if done {
@@ -4776,9 +4777,10 @@ impl App {
         let home = self.stack.len() - if into { 1 } else { 2 };
         // On the way down the keyboard goes with the search page's frame.
         let keyboard = if into { None } else { self.frame.as_ref().map(|fr| keyboard_strip(&self.theme(), fr)) };
+        let period = self.theme().motion.map_or(MORPH_PERIOD, |m| m.effects_spring_period);
         self.morph = Some(Morph {
             into,
-            spring: Spring::new(now, (q - target) * 1000.0, speed * 1000.0, self.theme().motion.map_or(MORPH_PERIOD, |m| m.effects_spring_period)),
+            spring: Spring::new(now, (q - target) * 1000.0, speed * 1000.0, period),
             start: now,
             scroll: self.stack[home].1,
             keyboard,
@@ -6187,7 +6189,8 @@ impl App {
                 }
                 Drag::Scroll { .. } if self.pull != 0.0 => {
                     // A page let go past its end springs back.
-                    self.bounce = Some(Spring::new(now, motion::rubber(self.pull, self.h as f32), 0.0, 0.4));
+                    let period = self.theme().motion.map_or(0.4, |m| m.spatial_spring_period);
+                    self.bounce = Some(Spring::new(now, motion::rubber(self.pull, self.h as f32), 0.0, period));
                     self.pull = 0.0;
                     self.dirty = true;
                 }
@@ -6213,7 +6216,8 @@ impl App {
                     // Short of going back, the cue sinks back into the edge.
                     let travel = if from_left { x - start } else { start - x };
                     let depth = widgets::back_cue_depth(&t, travel);
-                    self.cue = Some((from_left, cy, Spring::new(now, depth, 0.0, 0.15)));
+                    let period = self.theme().motion.map_or(0.15, |m| m.effects_spring_period);
+                    self.cue = Some((from_left, cy, Spring::new(now, depth, 0.0, period)));
                     self.dirty = true;
                 }
                 Drag::Confirm { which, track, .. } => {
