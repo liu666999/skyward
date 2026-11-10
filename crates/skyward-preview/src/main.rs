@@ -180,15 +180,22 @@ fn main() -> Result<()> {
         ("12-install-dark-update-pending", Screen::Install, true, &pending, Data::Open, &[]),
         ("13-screen-off-light", Screen::ScreenOff, false, &info, Data::Open, &[]),
     ];
+    // Render the same core pages in both palette families. Keep the
+    // existing stock filenames stable for downstream screenshot comparisons;
+    // expressive variants receive an explicit suffix.
     for (name, screen, dark, info, data, pattern) in shots {
-        let mut app = App::new(screen, w, h, ppd);
-        app.state.lang = lang;
-        app.state.dark = dark;
-        app.state.data = data;
-        app.state.pattern = pattern.to_vec();
-        let path = out.join(format!("{name}.png"));
-        write_png(&path, &whole_page(&mut app, &fonts, info))?;
-        println!("wrote {}", path.display());
+        for expressive in [false, true] {
+            let mut app = App::new(screen, w, h, ppd);
+            app.state.lang = lang;
+            app.state.dark = dark;
+            app.state.expressive = expressive;
+            app.state.data = data;
+            app.state.pattern = pattern.to_vec();
+            let suffix = if expressive { "-m3e" } else { "" };
+            let path = out.join(format!("{name}{suffix}.png"));
+            write_png(&path, &whole_page(&mut app, &fonts, info))?;
+            println!("wrote {}", path.display());
+        }
     }
 
     // The screen kept on, which warns about burn-in.
