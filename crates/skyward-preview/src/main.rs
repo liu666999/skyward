@@ -1023,9 +1023,9 @@ fn main() -> Result<()> {
         }),
     ];
     for (name, screen, dark, set) in pages {
-        // Search and file-navigation pages receive focused M3E previews:
-        // they cover the text field, path capsules, file rows and empty/error
-        // states without multiplying every long-page fixture in CI.
+        // Focused M3E previews cover search and file navigation, destructive
+        // actions, install outcomes, backup/restore jobs and update states.
+        // Stock previews remain generated for every fixture.
         let expressive_variants: &[bool] = if screen == Screen::Search
             || screen == Screen::Files
             || screen == Screen::Wipe
