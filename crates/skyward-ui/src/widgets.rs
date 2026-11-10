@@ -1727,7 +1727,10 @@ pub fn switch(c: &mut Canvas, t: &Theme, right: f32, cy: f32, on: bool) {
     let x = right - w;
     c.fill_round_rect(x, cy - h / 2.0, w, h, h / 2.0, if on { t.pal.accent } else { t.pal.switch_off });
     let kx = if on { right - h / 2.0 } else { x + h / 2.0 };
-    c.fill_circle(kx, cy, k / 2.0, t.pal.on_accent);
+    // M3 switches use an on-surface-variant thumb on the unselected track;
+    // the stock themes retain their original white thumb treatment.
+    let thumb = if on { t.pal.on_accent } else { t.typography.map_or(t.pal.on_accent, |_| t.pal.subtitle) };
+    c.fill_circle(kx, cy, k / 2.0, thumb);
 }
 
 /// The thick slider: a capsule track with the fill and an on-accent knob
@@ -2854,6 +2857,21 @@ mod tests {
         device_card(&mut flat, &flat_theme, &fonts, 100.0, "Device", "Android", &[]);
         assert_ne!(glass.data, flat.data, "the enabled material changes the card surface");
         assert_eq!(&glass.data[..4], &flat.data[..4], "pixels outside the card are not touched");
+    }
+
+    #[test]
+    fn expressive_switch_thumb_uses_a_contrasting_ink_when_off() {
+        for dark in [false, true] {
+            let t = Theme::expressive(240, 120, 1.0, dark);
+            let mut c = Canvas::new(240, 120);
+            c.clear(t.pal.bg);
+            let right = 200.0;
+            let cy = 60.0;
+            let knob_x = right - t.m.switch_w + t.m.switch_h / 2.0;
+            switch(&mut c, &t, right, cy, false);
+            let actual = pixel(&(c, 0, 0), knob_x, cy);
+            assert_eq!(actual, [t.pal.subtitle.r, t.pal.subtitle.g, t.pal.subtitle.b, t.pal.subtitle.a]);
+        }
     }
 
     #[test]
