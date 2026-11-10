@@ -99,7 +99,7 @@ with the repository's GPL-3.0-or-later distribution.
 - The selected palette is stored in the existing JSON settings file. Older files that do not contain the new `expressive` key continue to select the stock palette.
 - The M3E adapter maps semantic roles across cards, text, accents, avatars, status/battery inks, pressed states, popups and outlines. Named expressive shape roles set card and preview radii while preserving row heights and touch targets.
 - M3E typography roles now feed existing row-title, body, label and preview-caption sizes. The motion scheme is attached to the selected theme as renderer-neutral metadata, but existing animation timings have not yet been migrated.
-- Theme preview selection updates both palette family and brightness together; switching from M3E to stock cannot leave the old palette active. Contrast tests cover primary text, primary controls, error controls and raised surfaces in both schemes.
+- Theme preview selection updates both palette family and brightness together; switching from M3E to stock cannot leave the old palette active. Regression tests cover all four presets, four non-overlapping preview hit regions, backwards-compatible settings, semantic palette mapping and text/control contrast on raised surfaces in both schemes.
 - Liquid-glass rendering is intentionally not being expanded in this phase: finish and validate theme selection, palette consistency and previews first.
 
 ## Implementation notes
@@ -110,4 +110,4 @@ with the repository's GPL-3.0-or-later distribution.
 
 ## Current status
 
-The M3E theme adapter, four-way selector, persistent choice, semantic palette mapping, named shape/type metadata and initial contrast/regression tests are in place. The theme still needs a full preview pass across every page and a successful workspace CI run. Motion tokens are exposed but not yet applied to animation timings. Liquid Glass is not yet integrated into the active page components; no completed Liquid Glass implementation is claimed.
+The M3E theme adapter, four-way selector, persistent choice, semantic palette mapping, named shape/type metadata and initial contrast/regression tests are in place. The theme still needs a full preview pass across every page and a successful workspace CI run. Motion tokens are exposed but not yet applied to animation timings. The current fork branch has no reported GitHub Actions run or commit status, and this editing environment has no Rust toolchain for a local build. Liquid Glass is not yet integrated into the active page components; no completed Liquid Glass implementation is claimed.
