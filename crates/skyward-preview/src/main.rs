@@ -1023,12 +1023,25 @@ fn main() -> Result<()> {
         }),
     ];
     for (name, screen, dark, set) in pages {
-        let mut app = opened(screen, w, h, ppd);
-        app.state.dark = dark;
-        set(&mut app);
-        let path = out.join(format!("{name}.png"));
-        write_png(&path, &whole_page(&mut app, &fonts, &info))?;
-        println!("wrote {}", path.display());
+        // Search fields are a focused M3E text-field preview. Keep every
+        // existing stock filename stable and emit a parallel expressive
+        // image only for these fixtures, rather than multiplying all 178
+        // long-page screenshots in CI.
+        let expressive_variants: &[bool] = if screen == Screen::Search {
+            &[false, true]
+        } else {
+            &[false]
+        };
+        for expressive in expressive_variants {
+            let mut app = opened(screen, w, h, ppd);
+            app.state.dark = dark;
+            app.state.expressive = *expressive;
+            set(&mut app);
+            let suffix = if *expressive { "-m3e" } else { "" };
+            let path = out.join(format!("{name}{suffix}.png"));
+            write_png(&path, &whole_page(&mut app, &fonts, &info))?;
+            println!("wrote {}", path.display());
+        }
     }
 
     // The panel mid-gesture, to set beside recordings of the same moves.
