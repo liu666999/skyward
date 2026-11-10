@@ -2738,21 +2738,71 @@ pub fn keyboard(c: &mut Canvas, t: &Theme, f: &Fonts, l: Lang, top: f32, layer: 
 
 /// Miniature settings page: a blue backdrop with two cards of placeholder
 /// lines, light cards for the light theme and dark ones for the dark theme.
-fn theme_tile(c: &mut Canvas, t: &Theme, x: f32, y: f32, w: f32, h: f32, dark: bool) {
-    let (top, bottom) = (Rgba::rgb(77, 113, 246), Rgba::rgb(115, 184, 249));
+fn theme_tile(c: &mut Canvas, t: &Theme, x: f32, y: f32, w: f32, h: f32, dark: bool, expressive: bool) {
+    let (top, bottom, card) = if expressive {
+        let scheme = if dark { crate::expressive::ColorScheme::dark() } else { crate::expressive::ColorScheme::light() };
+        (scheme.primary, scheme.tertiary, scheme.surface_container.with_alpha(225))
+    } else {
+        let (top, bottom) = (Rgba::rgb(77, 113, 246), Rgba::rgb(115, 184, 249));
+        (top, bottom, if dark { Rgba::rgb(0, 0, 0).with_alpha(51) } else { Rgba::rgb(255, 255, 255).with_alpha(51) })
+    };
     let grad = |py: f32| mix(top, bottom, (py - y) / h);
-    c.fill_round_rect_graded(x, y, w, h, t.m.dp(20.0), &grad);
-    let card = if dark { Rgba::rgb(0, 0, 0).with_alpha(51) } else { Rgba::rgb(255, 255, 255).with_alpha(51) };
+    c.fill_round_rect_graded(x, y, w, h, t.m.dp(if expressive { 26.0 } else { 20.0 }), &grad);
     let lw = h * 0.027;
     for (c0, c1) in [(0.218f32, 0.472f32), (0.523, 0.779)] {
-        c.fill_round_rect(x + w * 0.069, y + h * c0, w * 0.86, h * (c1 - c0), w * 0.045, card);
+        let sy = y + h * c0;
+        let sh = h * (c1 - c0);
+        c.fill_round_rect(x + w * 0.069, sy, w * 0.86, sh, w * 0.045, card);
         for (at, end) in [(0.37f32, 0.841f32), (0.64, 0.622)] {
-            let ly = y + h * (c0 + (c1 - c0) * at);
+            let ly = sy + sh * at;
             let base = grad(ly);
-            let ink = if dark { mix(base, Rgba::rgb(180, 190, 190), 0.45) } else { mix(base, Rgba::rgb(0, 0, 0), 0.14) };
+            let ink = if expressive {
+                if dark { mix(base, Rgba::rgb(255, 255, 255), 0.42) } else { mix(base, Rgba::rgb(20, 25, 35), 0.38) }
+            } else if dark { mix(base, Rgba::rgb(180, 190, 190), 0.45) } else { mix(base, Rgba::rgb(0, 0, 0), 0.14) };
             c.line(x + w * 0.162 + lw / 2.0, ly, x + w * end - lw / 2.0, ly, lw, ink);
         }
     }
+}
+
+/// Four previews: stock and M3 Expressive, each in light and dark mode.
+/// The active preview carries an accent ring; rows follow the same order.
+pub fn theme_picker(c: &mut Canvas, t: &Theme, f: &Fonts, l: Lang, top: f32, expressive: bool) -> Block {
+    let m = &t.m;
+    let gap = m.dp(8.0);
+    let slot_w = (m.w as f32 - m.margin * 2.0 - gap) / 2.0;
+    let inset = m.dp(6.0);
+    let tile = slot_w - inset * 2.0;
+    let label_px = m.dp(13.5);
+    let (ink_top, ink_bottom) = f.heading.ink(label_px);
+    let row_pitch = slot_w + m.dp(8.0);
+    let caption_offset = slot_w + m.dp(9.0) - ink_top;
+    let bottom = top + row_pitch + caption_offset + ink_bottom;
+    let modes = [
+        (["原生浅色", "原生淺色", "Stock light"], false, false),
+        (["原生深色", "原生深色", "Stock dark"], true, false),
+        (["M3E 浅色", "M3E 淺色", "M3E light"], false, true),
+        (["M3E 深色", "M3E 深色", "M3E dark"], true, true),
+    ];
+    let mut rects = Vec::new();
+    for (i, (label, dark, m3e)) in modes.into_iter().enumerate() {
+        let col = i % 2;
+        let row = i / 2;
+        let sx = m.margin + (slot_w + gap) * col as f32;
+        let sy = top + row_pitch * row as f32;
+        let on = t.dark == dark && expressive == m3e;
+        if on {
+            let ring = m.dp(3.0);
+            c.stroke_round_rect(sx + ring / 2.0, sy + ring / 2.0, slot_w - ring, slot_w - ring, m.dp(26.0) - ring / 2.0, ring, t.pal.accent);
+        }
+        theme_tile(c, t, sx + inset, sy + inset, tile, tile, dark, m3e);
+        let label = l.pick(label);
+        let width = c.text_width(&f.heading, label, label_px);
+        let caption_y = sy + caption_offset;
+        let color = if on { t.pal.accent } else { t.pal.info };
+        c.text(&f.heading, label, sx + (slot_w - width) / 2.0, caption_y, label_px, color, None);
+        rects.push(Rect::new(sx, sy, slot_w, caption_offset + ink_bottom));
+    }
+    Block { bottom, rows: rects }
 }
 
 #[cfg(test)]
