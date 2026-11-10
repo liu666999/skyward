@@ -182,19 +182,34 @@ fn main() -> Result<()> {
     ];
     // Render the same core pages in both palette families. Keep the
     // existing stock filenames stable for downstream screenshot comparisons;
-    // expressive variants receive an explicit suffix.
+    // M3E and Liquid Glass variants receive explicit suffixes. The glass
+    // matrix is limited to Home (the first glass surface) and Settings
+    // (where its independent switch is shown).
     for (name, screen, dark, info, data, pattern) in shots {
         for expressive in [false, true] {
-            let mut app = App::new(screen, w, h, ppd);
-            app.state.lang = lang;
-            app.state.dark = dark;
-            app.state.expressive = expressive;
-            app.state.data = data;
-            app.state.pattern = pattern.to_vec();
-            let suffix = if expressive { "-m3e" } else { "" };
-            let path = out.join(format!("{name}{suffix}.png"));
-            write_png(&path, &whole_page(&mut app, &fonts, info))?;
-            println!("wrote {}", path.display());
+            let glass_variants: &[bool] = if matches!(screen, Screen::Home | Screen::Settings) {
+                &[false, true]
+            } else {
+                &[false]
+            };
+            for liquid_glass in glass_variants {
+                let mut app = App::new(screen, w, h, ppd);
+                app.state.lang = lang;
+                app.state.dark = dark;
+                app.state.expressive = expressive;
+                app.state.liquid_glass = *liquid_glass;
+                app.state.data = data;
+                app.state.pattern = pattern.to_vec();
+                let suffix = match (expressive, liquid_glass) {
+                    (false, false) => "",
+                    (true, false) => "-m3e",
+                    (false, true) => "-glass",
+                    (true, true) => "-m3e-glass",
+                };
+                let path = out.join(format!("{name}{suffix}.png"));
+                write_png(&path, &whole_page(&mut app, &fonts, info))?;
+                println!("wrote {}", path.display());
+            }
         }
     }
 
