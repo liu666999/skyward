@@ -1028,6 +1028,8 @@ fn main() -> Result<()> {
         // states without multiplying every long-page fixture in CI.
         let expressive_variants: &[bool] = if screen == Screen::Search
             || screen == Screen::Files
+            || screen == Screen::Wipe
+            || screen == Screen::RestoreBackup
             || matches!(screen, Screen::Choose(_))
         {
             &[false, true]
