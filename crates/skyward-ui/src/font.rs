@@ -1,6 +1,6 @@
 use ab_glyph::{Font, FontRef, GlyphId, PxScale, ScaleFont, VariableFont};
 use anyhow::{anyhow, Result};
-use std::cell::RefCell;
+use std::cell::{OnceCell, RefCell};
 use std::collections::HashMap;
 use std::path::Path;
 use std::rc::Rc;
@@ -187,6 +187,12 @@ pub const STOCK_WEIGHTS: Weights = Weights {
     display: 480.0,
 };
 
+pub struct ExpressiveFaces {
+    pub regular: Face,
+    pub medium: Face,
+    pub semibold: Face,
+}
+
 pub struct Fonts {
     /// Large page title.
     pub title: Face,
@@ -206,10 +212,8 @@ pub struct Fonts {
     pub speed: Face,
     /// The About page wordmark.
     pub display: Face,
-    /// Cached MiSans variable-font instances for M3 Expressive typography.
-    pub expressive_regular: Face,
-    pub expressive_medium: Face,
-    pub expressive_semibold: Face,
+    /// Created only if an M3 Expressive surface is actually drawn.
+    expressive: OnceCell<std::result::Result<ExpressiveFaces, String>>,
     /// The terminal's monospaced face, for the characters it has.
     pub mono: Face,
     /// What the UI typeface says about itself.
@@ -276,9 +280,7 @@ impl Fonts {
             strong: face(w.strong)?,
             speed: face(w.speed)?,
             display: face(w.display)?,
-            expressive_regular: face(400.0)?,
-            expressive_medium: face(500.0)?,
-            expressive_semibold: face(600.0)?,
+            expressive: OnceCell::new(),
             // A single-weight file: the coordinate asks for the weight it is.
             mono: Face::new(mono_data, 0, 400.0)?,
             info: FontInfo::read(data, index)?,
@@ -286,6 +288,22 @@ impl Fonts {
             data,
             index,
         })
+    }
+
+    /// Cached M3 Expressive faces, initialized only when an expressive
+    /// component needs them. Stock-only sessions allocate no extra faces.
+    pub fn expressive_faces(&self) -> Option<&ExpressiveFaces> {
+        self.expressive
+            .get_or_init(|| {
+                let make = |weight| Face::new(self.data, self.index, weight);
+                Ok(ExpressiveFaces {
+                    regular: make(400.0).map_err(|e| e.to_string())?,
+                    medium: make(500.0).map_err(|e| e.to_string())?,
+                    semibold: make(600.0).map_err(|e| e.to_string())?,
+                })
+            })
+            .as_ref()
+            .ok()
     }
 
     /// An extra instance at an arbitrary `wght` coordinate.
@@ -318,9 +336,12 @@ mod tests {
     #[test]
     fn expressive_variable_font_weights_are_cached_at_m3_roles() {
         let f = bundled();
-        assert_eq!(f.expressive_regular.weight, 400.0);
-        assert_eq!(f.expressive_medium.weight, 500.0);
-        assert_eq!(f.expressive_semibold.weight, 600.0);
+        assert!(f.expressive.get().is_none(), "stock font loading stays lazy");
+        let faces = f.expressive_faces().unwrap();
+        assert_eq!(faces.regular.weight, 400.0);
+        assert_eq!(faces.medium.weight, 500.0);
+        assert_eq!(faces.semibold.weight, 600.0);
+        assert!(f.expressive_faces().is_some(), "the cached faces remain available");
     }
 
     #[test]
