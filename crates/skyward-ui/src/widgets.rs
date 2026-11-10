@@ -1223,7 +1223,8 @@ pub fn section(c: &mut Canvas, t: &Theme, f: &Fonts, prev_bottom: f32, label: &s
     let m = &t.m;
     let ink_top = prev_bottom + m.section_label_top;
     let label_spacing = m.dp(t.typography.map_or(0.0, |scale| scale.label_medium.letter_spacing_sp));
-    c.text_spaced(&f.label, label, m.margin + m.inner, ink_top, m.label_px, t.pal.section, None, label_spacing);
+    let (label_ink_top, _) = f.label.ink(m.label_px);
+    c.text_spaced(&f.label, label, m.margin + m.inner, ink_top - label_ink_top, m.label_px, t.pal.section, None, label_spacing);
     prev_bottom + m.section_block
 }
 
@@ -1483,7 +1484,8 @@ fn draw_row(c: &mut Canvas, t: &Theme, f: &Fonts, r: &Row, lay: &Layout, top: f3
         c.fill_round_rect(x, title_cy - h / 2.0, w, h, radius, tone.value);
         c.fill_round_rect(x + stroke, title_cy - h / 2.0 + stroke, w - stroke * 2.0, h - stroke * 2.0, radius - stroke, tone.card);
         let tag_text_w = c.text_width_spaced(&f.body, tag, m.dp(TAG_PX), tag_spacing);
-        c.text_spaced(&f.body, tag, x + (w - tag_text_w) / 2.0, title_cy + f.body.ink(m.dp(TAG_PX)).0 * -0.5, m.dp(TAG_PX), tone.value, None, tag_spacing);
+        let (tag_ink_top, tag_ink_bottom) = f.body.ink(m.dp(TAG_PX));
+        c.text_spaced(&f.body, tag, x + (w - tag_text_w) / 2.0, title_cy - (tag_ink_top + tag_ink_bottom) / 2.0, m.dp(TAG_PX), tone.value, None, tag_spacing);
     }
     match r.trail {
         Trail::None => {}
