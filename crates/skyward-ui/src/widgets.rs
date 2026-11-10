@@ -2432,36 +2432,6 @@ pub fn output_row(c: &mut Canvas, t: &Theme, f: &Fonts, lines: &[String], i: usi
     }
 }
 
-/// Light and dark previews side by side; the active one carries an accent
-/// ring and an accent caption. The rows are the light and the dark choice.
-pub fn theme_picker(c: &mut Canvas, t: &Theme, f: &Fonts, l: Lang, top: f32) -> Block {
-    let m = &t.m;
-    let gap = m.dp(4.0);
-    let slot_w = (m.w as f32 - m.margin * 2.0 - gap) / 2.0;
-    let (ring, inset) = (m.dp(3.0), m.dp(6.0));
-    let tile = slot_w - inset * 2.0;
-    let label_px = m.dp(15.9);
-    let (ink_top, ink_bottom) = f.heading.ink(label_px);
-    let caption_base = top + slot_w + m.dp(11.0) - ink_top;
-    let bottom = caption_base + ink_bottom;
-    let mut rects = Vec::new();
-    let modes = [(["浅色模式", "淺色模式", "Light mode"], false), (["深色模式", "深色模式", "Dark mode"], true)];
-    for (i, (label, dark)) in modes.map(|(label, dark)| (l.pick(label), dark)).into_iter().enumerate() {
-        let sx = m.margin + (slot_w + gap) * i as f32;
-        let on = t.dark == dark;
-        if on {
-            let r = m.dp(26.0) - ring / 2.0;
-            c.stroke_round_rect(sx + ring / 2.0, top + ring / 2.0, slot_w - ring, slot_w - ring, r, ring, t.pal.accent);
-        }
-        theme_tile(c, t, sx + inset, top + inset, tile, tile, dark);
-        let w = c.text_width(&f.heading, label, label_px);
-        let color = if on { t.pal.accent } else { t.pal.info };
-        c.text(&f.heading, label, sx + (slot_w - w) / 2.0, caption_base, label_px, color, None);
-        rects.push(Rect::new(sx, top, slot_w, bottom - top));
-    }
-    Block { bottom, rows: rects }
-}
-
 /// What a card on the systems page shows: what the system is to the phone,
 /// in small type, its name in large, and its version or what the card
 /// offers under that.
