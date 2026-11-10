@@ -40,6 +40,9 @@ pub struct Settings {
     /// Whether the M3 Expressive palette is selected; absent in older settings means stock.
     #[serde(default)]
     pub expressive: bool,
+    /// Whether Liquid Glass is enabled on the home device card.
+    #[serde(default)]
+    pub liquid_glass: bool,
     /// The brightness slider's place, from 0 at its left end to 1.
     pub brightness: f32,
     /// How long the screen stays on with nothing touched, in seconds; 0
@@ -124,6 +127,7 @@ impl Settings {
             spoken: Some(state.lang.tag().to_string()),
             dark: state.dark,
             expressive: state.expressive,
+            liquid_glass: state.liquid_glass,
             brightness: state.brightness,
             screen_off: SCREEN_OFF[state.screen_off].map_or(0, |ms| ms / 1000),
             time_zone: TIME_ZONES[state.time_zone].2.to_string(),
@@ -175,6 +179,7 @@ impl Settings {
         }
         state.dark = self.dark;
         state.expressive = self.expressive;
+        state.liquid_glass = self.liquid_glass;
         if (0.0..=1.0).contains(&self.brightness) {
             state.brightness = self.brightness;
         }
