@@ -157,15 +157,28 @@ pub fn file_type(name: &str) -> FileType {
     TYPES.iter().find(|(_, exts)| exts.contains(&ext.as_str())).map_or(FileType::Other, |&(kind, _)| kind)
 }
 
-/// The colour of a type's sheet, as the stock list shows it on screen.
-fn sheet(kind: FileType) -> Rgba {
+/// The colour of a type's sheet. Stock keeps its measured colours; M3E
+/// uses semantic containers so the file list belongs to the active scheme.
+fn sheet(kind: FileType, t: &Theme) -> (Rgba, Rgba) {
+    if t.typography.is_none() {
+        let fill = match kind {
+            FileType::Archive | FileType::DiskImage | FileType::Code | FileType::Document => Rgba::rgb(74, 128, 247),
+            FileType::Picture | FileType::Video => Rgba::rgb(116, 104, 240),
+            FileType::Audio | FileType::Pdf => Rgba::rgb(230, 75, 59),
+            FileType::Package | FileType::Spreadsheet => Rgba::rgb(97, 202, 81),
+            FileType::Presentation => Rgba::rgb(237, 114, 46),
+            FileType::Text | FileType::Other => Rgba::rgb(143, 156, 174),
+        };
+        return (fill, WHITE);
+    }
+    let c = if t.dark { crate::expressive::ColorScheme::dark() } else { crate::expressive::ColorScheme::light() };
     match kind {
-        FileType::Archive | FileType::DiskImage | FileType::Code | FileType::Document => Rgba::rgb(74, 128, 247),
-        FileType::Picture | FileType::Video => Rgba::rgb(116, 104, 240),
-        FileType::Audio | FileType::Pdf => Rgba::rgb(230, 75, 59),
-        FileType::Package | FileType::Spreadsheet => Rgba::rgb(97, 202, 81),
-        FileType::Presentation => Rgba::rgb(237, 114, 46),
-        FileType::Text | FileType::Other => Rgba::rgb(143, 156, 174),
+        FileType::Archive | FileType::DiskImage | FileType::Code | FileType::Document => (c.primary_container, c.on_primary_container),
+        FileType::Picture | FileType::Video => (c.tertiary_container, c.on_tertiary_container),
+        FileType::Audio | FileType::Pdf => (c.error_container, c.on_error_container),
+        FileType::Package | FileType::Spreadsheet => (c.success_container, c.on_success_container),
+        FileType::Presentation => (c.warning_container, c.on_warning_container),
+        FileType::Text | FileType::Other => (c.surface_container_high, c.on_surface),
     }
 }
 
@@ -256,7 +269,7 @@ pub fn row(c: &mut Canvas, t: &Theme, f: &Fonts, l: Lang, e: &FileRow, now: i64,
             FileKind::Special => FileType::Other,
             _ => file_type(&e.name),
         };
-        file_icon(c, f, ix, iy, size, p.page, kind);
+        file_icon(c, t, f, ix, iy, size, p.page, kind);
     }
     let (x, w) = (m.dp(TEXT_X_DP), name_width(t));
     let lines = name_lines(&f.heading, m.dp(NAME_DP), &e.name, w);
@@ -293,10 +306,10 @@ fn folder_icon(c: &mut Canvas, x: f32, y: f32, size: f32) {
 /// A file 40 units square scaled to `size`: a sheet with its top right
 /// corner folded down, in the colour of what the file holds, and a sign of
 /// that in white; `page` is the colour around it.
-fn file_icon(c: &mut Canvas, f: &Fonts, x: f32, y: f32, size: f32, page: Rgba, kind: FileType) {
+fn file_icon(c: &mut Canvas, t: &Theme, f: &Fonts, x: f32, y: f32, size: f32, page: Rgba, kind: FileType) {
     let u = size / 40.0;
     let at = |v: f32, w: f32| (x + v * u, y + w * u);
-    let color = sheet(kind);
+    let (color, ink) = sheet(kind, t);
     c.fill_round_rect(x + 4.0 * u, y, 32.0 * u, 40.0 * u, 8.0 * u, color);
     // The corner cut away along the fold, and the flap folded down over the
     // sheet, its inner corner rounded.
@@ -307,7 +320,7 @@ fn file_icon(c: &mut Canvas, f: &Fonts, x: f32, y: f32, size: f32, page: Rgba, k
         at(31.4 + 6.4 * a.cos(), 4.6 + 6.4 * a.sin())
     }));
     c.fill_convex(&flap, mix(color, WHITE, 0.3));
-    sign(c, f, kind, x, y, u, color);
+    sign(c, f, kind, x, y, u, color, ink);
 }
 
 const WHITE: Rgba = Rgba::rgb(255, 255, 255);
@@ -315,7 +328,7 @@ const WHITE: Rgba = Rgba::rgb(255, 255, 255);
 /// The white sign of what a file holds, on its sheet at (`x`, `y`) in
 /// units of `u` pixels; `sheet` is the sheet's colour, for what is cut out
 /// of the sign.
-fn sign(c: &mut Canvas, f: &Fonts, kind: FileType, x: f32, y: f32, u: f32, sheet: Rgba) {
+fn sign(c: &mut Canvas, f: &Fonts, kind: FileType, x: f32, y: f32, u: f32, sheet: Rgba, ink: Rgba) {
     let at = |v: f32, w: f32| (x + v * u, y + w * u);
     let line = |c: &mut Canvas, a: (f32, f32), b: (f32, f32), t: f32, color: Rgba| {
         let (p, q) = (at(a.0, a.1), at(b.0, b.1));
@@ -334,42 +347,42 @@ fn sign(c: &mut Canvas, f: &Fonts, kind: FileType, x: f32, y: f32, u: f32, sheet
         FileType::Archive => {
             for k in 0..7 {
                 let left = if k % 2 == 0 { 20.0 } else { 18.3 };
-                c.fill_rect(x + left * u, y + (1.6 + 2.5 * k as f32) * u, 1.7 * u, 1.5 * u, WHITE);
+                c.fill_rect(x + left * u, y + (1.6 + 2.5 * k as f32) * u, 1.7 * u, 1.5 * u, ink);
             }
-            c.fill_round_rect(x + 17.3 * u, y + 19.6 * u, 5.4 * u, 10.2 * u, 1.1 * u, WHITE);
+            c.fill_round_rect(x + 17.3 * u, y + 19.6 * u, 5.4 * u, 10.2 * u, 1.1 * u, ink);
             c.fill_round_rect(x + 18.7 * u, y + 23.4 * u, 2.6 * u, 4.6 * u, 0.6 * u, sheet);
         }
         // A drive, with its slot and its light.
         FileType::DiskImage => {
-            c.fill_round_rect(x + 12.2 * u, y + 17.5 * u, 15.6 * u, 11.0 * u, 2.2 * u, WHITE);
+            c.fill_round_rect(x + 12.2 * u, y + 17.5 * u, 15.6 * u, 11.0 * u, 2.2 * u, ink);
             line(c, (14.9, 24.8), (20.3, 24.8), 1.2, sheet);
             let (lx, ly) = at(24.8, 24.8);
             c.fill_circle(lx, ly, 1.0 * u, sheet);
         }
         // A framed view of hills under the sun.
         FileType::Picture => {
-            c.stroke_round_rect(x + 11.6 * u, y + 15.6 * u, 16.8 * u, 14.4 * u, 2.6 * u, 1.6 * u, WHITE);
+            c.stroke_round_rect(x + 11.6 * u, y + 15.6 * u, 16.8 * u, 14.4 * u, 2.6 * u, 1.6 * u, ink);
             let (sx, sy) = at(23.7, 19.8);
-            c.fill_circle(sx, sy, 1.6 * u, WHITE);
-            c.fill_convex(&[at(13.4, 28.6), at(18.2, 21.8), at(23.0, 28.6)], WHITE);
-            c.fill_convex(&[at(19.8, 28.6), at(23.6, 24.2), at(27.0, 28.6)], WHITE);
+            c.fill_circle(sx, sy, 1.6 * u, ink);
+            c.fill_convex(&[at(13.4, 28.6), at(18.2, 21.8), at(23.0, 28.6)], ink);
+            c.fill_convex(&[at(19.8, 28.6), at(23.6, 24.2), at(27.0, 28.6)], ink);
         }
         // Play, its corners rounded by the strokes around it, a little
         // right of the middle as its weight lies left.
         FileType::Video => {
             let corners = [(15.7, 17.4), (24.7, 23.0), (15.7, 28.6)];
-            c.fill_convex(&corners.map(|(v, w)| at(v, w)), WHITE);
+            c.fill_convex(&corners.map(|(v, w)| at(v, w)), ink);
             for k in 0..3 {
-                line(c, corners[k], corners[(k + 1) % 3], 2.2, WHITE);
+                line(c, corners[k], corners[(k + 1) % 3], 2.2, ink);
             }
         }
         // A quaver.
         FileType::Audio => {
             let (hx, hy) = at(17.25, 27.6);
-            c.fill_circle(hx, hy, 2.9 * u, WHITE);
-            line(c, (19.45, 27.6), (19.45, 16.7), 1.8, WHITE);
-            line(c, (19.45, 16.7), (24.45, 18.5), 2.4, WHITE);
-            line(c, (24.45, 18.5), (24.45, 20.9), 1.8, WHITE);
+            c.fill_circle(hx, hy, 2.9 * u, ink);
+            line(c, (19.45, 27.6), (19.45, 16.7), 1.8, ink);
+            line(c, (19.45, 16.7), (24.45, 18.5), 2.4, ink);
+            line(c, (24.45, 18.5), (24.45, 20.9), 1.8, ink);
         }
         // A box seen from above, its faces parted.
         FileType::Package => {
@@ -380,7 +393,7 @@ fn sign(c: &mut Canvas, f: &Fonts, kind: FileType, x: f32, y: f32, u: f32, sheet
             c.fill_convex(&[30.0, 90.0, 150.0, 210.0, 270.0, 330.0].map(|deg| {
                 let (v, w) = corner(deg);
                 at(v, w)
-            }), WHITE);
+            }), ink);
             for deg in [90.0, 210.0, 330.0] {
                 line(c, (20.0, 23.2), corner(deg), 1.3, sheet);
             }
@@ -389,43 +402,43 @@ fn sign(c: &mut Canvas, f: &Fonts, kind: FileType, x: f32, y: f32, u: f32, sheet
         FileType::Text => {
             for (k, end) in [27.0, 27.0, 27.0, 21.6].into_iter().enumerate() {
                 let row = 17.4 + 3.9 * k as f32;
-                line(c, (13.0, row), (end, row), 1.8, WHITE);
+                line(c, (13.0, row), (end, row), 1.8, ink);
             }
         }
         // Angle brackets around a slash.
         FileType::Code => {
             for (a, b) in [((17.0, 18.8), (13.6, 23.0)), ((13.6, 23.0), (17.0, 27.2)), ((23.0, 18.8), (26.4, 23.0)), ((26.4, 23.0), (23.0, 27.2))] {
-                line(c, a, b, 1.8, WHITE);
+                line(c, a, b, 1.8, ink);
             }
-            line(c, (21.3, 17.8), (18.7, 28.2), 1.8, WHITE);
+            line(c, (21.3, 17.8), (18.7, 28.2), 1.8, ink);
         }
         // A W, for a word processor's document.
         FileType::Document => {
             let w = [(13.4, 17.8), (16.2, 28.2), (20.0, 20.6), (23.8, 28.2), (26.6, 17.8)];
             for pair in w.windows(2) {
-                line(c, pair[0], pair[1], 2.0, WHITE);
+                line(c, pair[0], pair[1], 2.0, ink);
             }
         }
         // A table with a heading row and column.
         FileType::Spreadsheet => {
-            c.stroke_round_rect(x + 12.6 * u, y + 16.6 * u, 14.8 * u, 12.8 * u, 1.8 * u, 1.6 * u, WHITE);
-            line(c, (12.6, 21.2), (27.4, 21.2), 1.6, WHITE);
-            line(c, (18.2, 16.6), (18.2, 29.4), 1.6, WHITE);
+            c.stroke_round_rect(x + 12.6 * u, y + 16.6 * u, 14.8 * u, 12.8 * u, 1.8 * u, 1.6 * u, ink);
+            line(c, (12.6, 21.2), (27.4, 21.2), 1.6, ink);
+            line(c, (18.2, 16.6), (18.2, 29.4), 1.6, ink);
         }
         // A pie with a slice drawn out of it.
         FileType::Presentation => {
             let (cx, cy) = at(19.2, 23.8);
-            c.fill_circle(cx, cy, 6.4 * u, WHITE);
+            c.fill_circle(cx, cy, 6.4 * u, ink);
             c.fill_convex(&quarter(18.8, 24.2, 7.6), sheet);
-            c.fill_convex(&quarter(20.4, 22.6, 6.4), WHITE);
+            c.fill_convex(&quarter(20.4, 22.6, 6.4), ink);
         }
         FileType::Pdf => {
             let (cx, cy) = at(19.85, 22.9);
-            c.text_center(&f.strong, "PDF", cx, cy, 8.6 * u, WHITE);
+            c.text_center(&f.strong, "PDF", cx, cy, 8.6 * u, ink);
         }
         FileType::Other => {
             let (cx, cy) = at(20.0, 23.0);
-            c.text_center(&f.strong, "?", cx, cy, 18.0 * u, WHITE);
+            c.text_center(&f.strong, "?", cx, cy, 18.0 * u, ink);
         }
     }
 }
@@ -506,6 +519,27 @@ mod tests {
     use super::*;
 
     #[test]
+    #[test]
+    fn m3_file_type_sheets_use_matching_semantic_container_inks() {
+        for dark in [false, true] {
+            let t = Theme::expressive(1440, 3200, 3.5, dark);
+            let c = if dark { crate::expressive::ColorScheme::dark() } else { crate::expressive::ColorScheme::light() };
+            assert_eq!(sheet(FileType::Archive, &t), (c.primary_container, c.on_primary_container));
+            assert_eq!(sheet(FileType::Picture, &t), (c.tertiary_container, c.on_tertiary_container));
+            assert_eq!(sheet(FileType::Audio, &t), (c.error_container, c.on_error_container));
+            assert_eq!(sheet(FileType::Package, &t), (c.success_container, c.on_success_container));
+            assert_eq!(sheet(FileType::Presentation, &t), (c.warning_container, c.on_warning_container));
+            assert_eq!(sheet(FileType::Other, &t), (c.surface_container_high, c.on_surface));
+        }
+    }
+
+    #[test]
+    fn stock_file_type_sheets_keep_the_original_colours_and_white_ink() {
+        let t = Theme::light(1440, 3200, 3.5);
+        assert_eq!(sheet(FileType::Archive, &t), (Rgba::rgb(74, 128, 247), WHITE));
+        assert_eq!(sheet(FileType::Audio, &t), (Rgba::rgb(230, 75, 59), WHITE));
+    }
+
     fn m3_file_navigation_uses_semantic_surface_and_content_roles() {
         for dark in [false, true] {
             let t = Theme::expressive(1440, 3200, 3.5, dark);
