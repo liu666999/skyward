@@ -8434,6 +8434,14 @@ mod tests {
         assert!(app.state.dark && !app.state.expressive);
         tap(&mut app, &f, &i, Action::Theme { dark: false, expressive: true });
         assert!(!app.state.dark && app.state.expressive);
+
+        tap(&mut app, &f, &i, Action::Toggle(Switch::LiquidGlass));
+        assert!(app.state.liquid_glass);
+        assert!(app.theme().liquid_glass, "glass is independent of the selected palette");
+        tap(&mut app, &f, &i, Action::Theme { dark: true, expressive: false });
+        assert!(app.theme().liquid_glass, "changing the colour theme does not switch glass off");
+        tap(&mut app, &f, &i, Action::Toggle(Switch::LiquidGlass));
+        assert!(!app.theme().liquid_glass, "the original flat card surface remains selectable");
     }
 
     #[test]
