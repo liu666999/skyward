@@ -147,6 +147,17 @@ pub struct ShapeScale {
 }
 
 impl ShapeScale {
+    /// Existing Skyward geometry, expressed as named shape roles.
+    pub const STOCK: Self = Self {
+        none: 0.0,
+        extra_small: 4.0,
+        small: 8.0,
+        medium: 12.0,
+        large: 16.0,
+        extra_large: 20.0,
+        full: 999.0,
+    };
+
     pub const EXPRESSIVE: Self = Self {
         none: 0.0,
         extra_small: 4.0,
