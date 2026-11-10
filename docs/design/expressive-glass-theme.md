@@ -93,6 +93,13 @@ or adapted, retain its copyright and Apache-2.0 notices in the relevant files
 and document the adaptation. Keep the resulting Skyward changes compatible
 with the repository's GPL-3.0-or-later distribution.
 
+## Theme implementation progress
+
+- Settings now offers four independent previews: stock light, stock dark, M3 Expressive light, and M3 Expressive dark.
+- The selected palette is stored in the existing JSON settings file. Older files that do not contain the new `expressive` key continue to select the stock palette.
+- The M3E adapter maps semantic roles across cards, text, accents, avatars, status/battery inks, pressed states, popups and outlines. It applies a more expressive card radius while preserving existing layout and hit targets.
+- Typography roles and motion tokens remain defined as design tokens; they are not yet wired into the font and animation systems. Liquid-glass rendering is intentionally not being expanded in this phase: finish and validate theme selection, palette consistency and previews first.
+
 ## Implementation notes
 
 - `theme.rs` now exposes `Theme::expressive(w, h, px_per_dp, dark)`, adapting M3E semantic roles into the existing Skyward palette consumed by current widgets. Geometry, touch targets, battery inks and recovery actions remain inherited from the stock theme.
