@@ -11,6 +11,7 @@ pub struct Face {
     pub(crate) font: FontRef<'static>,
     upem: f32,
     height: f32,
+    weight: f32,
     /// What drawing text in the face has worked out, kept: outlining a
     /// glyph of a variable font, its points moved for the weight, and
     /// rasterizing it cost more than all else a page draws.
@@ -54,7 +55,7 @@ impl Face {
         font.set_variation(b"wght", weight);
         let upem = font.units_per_em().ok_or_else(|| anyhow!("font has no units-per-em"))?;
         let height = font.height_unscaled();
-        Ok(Face { font, upem, height, known: RefCell::new(Known::default()) })
+        Ok(Face { font, upem, height, weight, known: RefCell::new(Known::default()) })
     }
 
     /// The glyph for `ch`, and how far it advances the pen at `scale`.
@@ -205,6 +206,10 @@ pub struct Fonts {
     pub speed: Face,
     /// The About page wordmark.
     pub display: Face,
+    /// Cached MiSans variable-font instances for M3 Expressive typography.
+    pub expressive_regular: Face,
+    pub expressive_medium: Face,
+    pub expressive_semibold: Face,
     /// The terminal's monospaced face, for the characters it has.
     pub mono: Face,
     /// What the UI typeface says about itself.
@@ -271,6 +276,9 @@ impl Fonts {
             strong: face(w.strong)?,
             speed: face(w.speed)?,
             display: face(w.display)?,
+            expressive_regular: face(400.0)?,
+            expressive_medium: face(500.0)?,
+            expressive_semibold: face(600.0)?,
             // A single-weight file: the coordinate asks for the weight it is.
             mono: Face::new(mono_data, 0, 400.0)?,
             info: FontInfo::read(data, index)?,
@@ -306,6 +314,14 @@ pub(crate) fn bundled() -> Fonts {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn expressive_variable_font_weights_are_cached_at_m3_roles() {
+        let f = bundled();
+        assert_eq!(f.expressive_regular.weight, 400.0);
+        assert_eq!(f.expressive_medium.weight, 500.0);
+        assert_eq!(f.expressive_semibold.weight, 600.0);
+    }
 
     #[test]
     fn a_line_is_as_tall_as_the_stock_search_fields_cursor() {
