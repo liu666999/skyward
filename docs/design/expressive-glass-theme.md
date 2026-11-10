@@ -114,6 +114,12 @@ The host preview runner now renders its existing core-page screenshot set twice:
 
 This is preview-generation support only. The screenshots have not yet been generated or visually reviewed in this environment, and this does not replace the full-page matrix, workspace tests, Android target build, or device verification.
 
+### Opt-in integration: home device card
+
+The home device-information card now has a separate Liquid Glass switch in Settings. The choice is stored in the recovery settings JSON and defaults to off for both fresh installs and older settings files. It does not depend on the stock/M3E palette choice.
+
+When enabled, the renderer snapshots the already-painted page as the backdrop, paints the bounded glass panel, and only then draws the avatar, labels, chevron and interactive rows. When disabled, the original flat card fill path is retained. The first integration is deliberately limited to this decorative home card; destructive-operation, confirmation, progress and other functional cards remain unchanged. The material currently uses the Standard preset. The preference and theme-toggle behavior have regression tests in source, but those tests have not yet been run in this environment.
+
 ### Renderer regression coverage
 
 Host-side unit tests now exercise the glass panel's visible blur on a high-contrast checker backdrop, verify pixels outside the rounded panel are unchanged, verify rounded-corner clipping, exercise panels extending beyond the canvas bounds, and check that zero blur preserves a uniform backdrop. These tests are committed but have not yet been executed in this environment; they are not a substitute for measuring frame time and peak memory on the recovery target.
