@@ -1817,9 +1817,10 @@ pub fn confirm(c: &mut Canvas, t: &Theme, f: &Fonts, top: f32, label: &str, dang
     let m = &t.m;
     let accent = if danger { t.pal.danger } else { t.pal.accent };
     let accent_ink = if danger { t.pal.on_danger } else { t.pal.on_accent };
+    let label_ink = if danger { t.pal.danger_soft_ink } else { t.pal.badge_ink };
     let (x, w, h) = (m.margin, m.w as f32 - m.margin * 2.0, m.dp(56.0));
     c.fill_round_rect(x, top, w, h, h / 2.0, if danger { t.pal.danger_soft } else { t.pal.badge });
-    c.text_center(&f.heading, label, x + w / 2.0 + h / 4.0, top + h / 2.0, m.row_title_px, accent);
+    c.text_center(&f.heading, label, x + w / 2.0 + h / 4.0, top + h / 2.0, m.row_title_px, label_ink);
     let k = h - m.dp(8.0);
     let kcx = x + h / 2.0 + (w - h) * progress.clamp(0.0, 1.0);
     let kcy = top + h / 2.0;
