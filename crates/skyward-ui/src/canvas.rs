@@ -1441,6 +1441,61 @@ mod tests {
         assert!(at(6, 2) > 0 && at(6, 2) < 60, "the curve is smoothed: {}", at(6, 2));
     }
 
+    fn test_glass_material(blur_radius: f32) -> crate::glass::GlassMaterial {
+        crate::glass::GlassMaterial {
+            tint: Rgba::rgb(255, 255, 255).with_alpha(0),
+            blur_radius,
+            refraction_px: 0.0,
+            saturation: 1.0,
+            edge_highlight: Rgba::rgb(255, 255, 255).with_alpha(0),
+            edge_width_px: 0.5,
+            shadow: Rgba::rgb(0, 0, 0).with_alpha(0),
+            shadow_blur_px: 0.0,
+        }
+    }
+
+    #[test]
+    fn glass_blurs_inside_its_rounded_panel_and_leaves_the_backdrop_outside_untouched() {
+        let mut backdrop = Canvas::new(24, 24);
+        for y in 0..24 {
+            for x in 0..24 {
+                let v = if (x + y) % 2 == 0 { 0 } else { 240 };
+                backdrop.data[((y * 24 + x) * 4) as usize..((y * 24 + x) * 4 + 4) as usize]
+                    .copy_from_slice(&[v, v, v, 255]);
+            }
+        }
+
+        let mut target = backdrop.clone();
+        target.glass_round_rect(&backdrop, 5.0, 5.0, 14.0, 14.0, 4.0, test_glass_material(2.0));
+
+        let pixel = |c: &Canvas, x: usize, y: usize| {
+            let i = (y * c.w as usize + x) * 4;
+            [c.data[i], c.data[i + 1], c.data[i + 2], c.data[i + 3]]
+        };
+        assert_ne!(pixel(&target, 11, 11), pixel(&backdrop, 11, 11), "the panel interior receives backdrop blur");
+        assert_eq!(pixel(&target, 0, 0), pixel(&backdrop, 0, 0), "pixels outside the panel remain unchanged");
+        assert_eq!(pixel(&target, 5, 5), pixel(&backdrop, 5, 5), "the rounded corner remains clipped");
+    }
+
+    #[test]
+    fn glass_panel_clips_safely_when_its_bounds_extend_past_the_canvas() {
+        let backdrop = Canvas::filled(12, 10, Rgba::rgb(80, 100, 120));
+        let mut target = backdrop.clone();
+        target.glass_round_rect(&backdrop, -4.0, -3.0, 12.0, 10.0, 3.0, test_glass_material(3.0));
+        assert_eq!(target.w, 12);
+        assert_eq!(target.h, 10);
+        assert_eq!(target.data.len(), backdrop.data.len());
+        assert_eq!(target.data, backdrop.data, "uniform backdrop remains visually unchanged");
+    }
+
+    #[test]
+    fn glass_zero_blur_keeps_a_uniform_backdrop_stable() {
+        let backdrop = Canvas::filled(10, 10, Rgba::rgb(34, 56, 78));
+        let mut target = backdrop.clone();
+        target.glass_round_rect(&backdrop, 1.0, 1.0, 8.0, 8.0, 2.0, test_glass_material(0.0));
+        assert_eq!(target.data, backdrop.data);
+    }
+
     #[test]
     fn a_crop_copies_the_part_asked_for() {
         let src = graded(6);
