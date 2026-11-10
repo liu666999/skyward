@@ -219,7 +219,6 @@ impl Theme {
         theme.m.row_title_px = theme.m.dp(TypeScale::EXPRESSIVE.title_medium.size_sp);
         theme.m.sub_px = theme.m.dp(TypeScale::EXPRESSIVE.body_medium.size_sp);
         theme.m.label_px = theme.m.dp(TypeScale::EXPRESSIVE.label_medium.size_sp);
-        theme.m.status_px = theme.m.dp(TypeScale::EXPRESSIVE.label_small.size_sp);
         theme.hero.card = if dark { c.surface_container_high.with_alpha(230) } else { c.surface_container_lowest };
         theme.hero.title = c.on_surface;
         theme.hero.value = c.on_surface_variant;
