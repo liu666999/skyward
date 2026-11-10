@@ -2748,12 +2748,12 @@ pub fn keyboard(c: &mut Canvas, t: &Theme, f: &Fonts, l: Lang, top: f32, layer: 
 /// Miniature settings page: a blue backdrop with two cards of placeholder
 /// lines, light cards for the light theme and dark ones for the dark theme.
 fn theme_tile(c: &mut Canvas, t: &Theme, x: f32, y: f32, w: f32, h: f32, dark: bool, expressive: bool) {
-    let (top, bottom, card) = if expressive {
+    let (top, bottom, card, placeholder_ink) = if expressive {
         let scheme = if dark { crate::expressive::ColorScheme::dark() } else { crate::expressive::ColorScheme::light() };
-        (scheme.primary, scheme.tertiary, scheme.surface_container.with_alpha(225))
+        (scheme.primary, scheme.tertiary, scheme.surface_container.with_alpha(225), scheme.on_surface_variant)
     } else {
         let (top, bottom) = (Rgba::rgb(77, 113, 246), Rgba::rgb(115, 184, 249));
-        (top, bottom, if dark { Rgba::rgb(0, 0, 0).with_alpha(51) } else { Rgba::rgb(255, 255, 255).with_alpha(51) })
+        (top, bottom, if dark { Rgba::rgb(0, 0, 0).with_alpha(51) } else { Rgba::rgb(255, 255, 255).with_alpha(51) }, Rgba::rgb(0, 0, 0))
     };
     let grad = |py: f32| mix(top, bottom, (py - y) / h);
     c.fill_round_rect_graded(x, y, w, h, t.m.dp(if expressive { crate::expressive::ShapeScale::EXPRESSIVE.extra_large } else { crate::expressive::ShapeScale::STOCK.extra_large }), &grad);
@@ -2766,8 +2766,12 @@ fn theme_tile(c: &mut Canvas, t: &Theme, x: f32, y: f32, w: f32, h: f32, dark: b
             let ly = sy + sh * at;
             let base = grad(ly);
             let ink = if expressive {
-                if dark { mix(base, Rgba::rgb(255, 255, 255), 0.42) } else { mix(base, Rgba::rgb(20, 25, 35), 0.38) }
-            } else if dark { mix(base, Rgba::rgb(180, 190, 190), 0.45) } else { mix(base, Rgba::rgb(0, 0, 0), 0.14) };
+                placeholder_ink
+            } else if dark {
+                mix(base, Rgba::rgb(180, 190, 190), 0.45)
+            } else {
+                mix(base, Rgba::rgb(0, 0, 0), 0.14)
+            };
             c.line(x + w * 0.162 + lw / 2.0, ly, x + w * end - lw / 2.0, ly, lw, ink);
         }
     }
