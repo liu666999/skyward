@@ -2974,8 +2974,8 @@ impl App {
         if self.blink_at(now).is_some_and(|(on, _)| on != self.caret_shown) || self.morph.is_some() || self.turn.is_some() {
             self.dirty = true;
         }
-        let row_press_period = self.theme().motion.map_or(ROW_PRESS_PERIOD, |m| m.effects_spring_period);
         if let Some(p) = self.row_press {
+            let row_press_period = self.theme().motion.map_or(ROW_PRESS_PERIOD, |m| m.effects_spring_period);
             if p.gone(now, row_press_period) {
                 self.row_press = None;
                 self.row_art = None;
@@ -4571,6 +4571,9 @@ impl App {
     /// behind, and how dark that is; nothing once the slide is over. See
     /// [`Turn`].
     fn slid(&mut self, now: u64) -> Option<(i32, i32, f32)> {
+        if self.turn.is_none() {
+            return None;
+        }
         let spatial_period = self.theme().motion.map_or(OPEN_PERIOD, |m| m.spatial_spring_period);
         let turn = self.turn.as_mut()?;
         let spring = *turn.spring.get_or_insert_with(|| {
@@ -4776,8 +4779,9 @@ impl App {
         // The home page is the page shown, or the one under the search.
         let home = self.stack.len() - if into { 1 } else { 2 };
         // On the way down the keyboard goes with the search page's frame.
-        let keyboard = if into { None } else { self.frame.as_ref().map(|fr| keyboard_strip(&self.theme(), fr)) };
-        let period = self.theme().motion.map_or(MORPH_PERIOD, |m| m.effects_spring_period);
+        let theme = self.theme();
+        let keyboard = if into { None } else { self.frame.as_ref().map(|fr| keyboard_strip(&theme, fr)) };
+        let period = theme.motion.map_or(MORPH_PERIOD, |m| m.effects_spring_period);
         self.morph = Some(Morph {
             into,
             spring: Spring::new(now, (q - target) * 1000.0, speed * 1000.0, period),
