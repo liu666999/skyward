@@ -1031,6 +1031,7 @@ fn main() -> Result<()> {
         // Wi-Fi, filesystem operations, destructive actions, install outcomes,
         // backup/restore jobs and update states. Stock fixtures remain intact.
         let expressive_variants: &[bool] = if screen == Screen::Search
+            || screen == Screen::Terminal
             || screen == Screen::Files
             || screen == Screen::Permissions
             || screen == Screen::Wlan
