@@ -186,12 +186,18 @@ impl Theme {
             search_icon: c.on_surface_variant,
             placeholder: c.on_surface_variant.with_alpha(150),
             badge: c.primary_container,
+            avatar: c.primary_container,
+            avatar_glyph: c.on_primary_container,
             status: c.on_surface,
+            battery: BatteryInk { charging: c.primary, low: c.error, level: c.on_surface, empty: c.outline_variant, bolt: c.on_primary },
+            mono_icon: c.on_surface_variant,
             danger: c.error,
             danger_soft: c.error_container,
             info: c.on_surface_variant,
             outline: c.outline,
             spec_label: c.on_surface_variant,
+            row_press: c.primary_container.with_alpha(if dark { 76 } else { 54 }),
+            button_press: c.primary_container.with_alpha(if dark { 92 } else { 68 }),
             round: c.surface_container_high,
             round_mark: c.on_surface_variant,
             updown: c.surface_variant,
@@ -199,7 +205,8 @@ impl Theme {
             shadow: c.shadow.with_alpha(if dark { 90 } else { 36 }),
             ..theme.pal
         };
-        theme.hero.card = if dark { c.surface_container_high.with_alpha(210) } else { c.surface_container_lowest };
+        theme.m.card_radius = theme.m.dp(26.0);
+        theme.hero.card = if dark { c.surface_container_high.with_alpha(230) } else { c.surface_container_lowest };
         theme.hero.title = c.on_surface;
         theme.hero.value = c.on_surface_variant;
         theme.hero.chevron = c.outline;
