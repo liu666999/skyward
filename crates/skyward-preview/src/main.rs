@@ -320,15 +320,19 @@ fn main() -> Result<()> {
         ("17-mount-light-update-pending", false, &pending, None, &["product", "system_ext"]),
     ];
     for (name, dark, info, failure, unmounted) in mounting {
-        let mut app = opened(Screen::Mount, w, h, ppd);
-        app.state.dark = dark;
-        app.set_mounts(Ok(sample_mounts(unmounted)));
-        if let Some(failure) = failure {
-            app.mount_failed(failure);
+        for expressive in [false, true] {
+            let mut app = opened(Screen::Mount, w, h, ppd);
+            app.state.dark = dark;
+            app.state.expressive = expressive;
+            app.set_mounts(Ok(sample_mounts(unmounted)));
+            if let Some(failure) = failure {
+                app.mount_failed(failure);
+            }
+            let suffix = if expressive { "-m3e" } else { "" };
+            let path = out.join(format!("{name}{suffix}.png"));
+            write_png(&path, &whole_page(&mut app, &fonts, info))?;
+            println!("wrote {}", path.display());
         }
-        let path = out.join(format!("{name}.png"));
-        write_png(&path, &whole_page(&mut app, &fonts, info))?;
-        println!("wrote {}", path.display());
     }
 
     // The pages the remaining features open, each with what it would show.
