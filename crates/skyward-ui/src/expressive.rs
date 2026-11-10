@@ -335,6 +335,13 @@ mod tests {
             assert!(contrast(colors.on_error_container, colors.error_container) >= 4.5);
             assert!(contrast(colors.on_success_container, colors.success_container) >= 4.5);
             assert!(contrast(colors.on_warning_container, colors.warning_container) >= 4.5);
+            // Status accents are drawn directly on page surfaces, not inside their containers.
+            assert!(contrast(colors.on_success_container, colors.surface) >= 4.5);
+            assert!(contrast(colors.on_success_container, colors.surface_container_high) >= 4.5);
+            assert!(contrast(colors.on_warning_container, colors.surface) >= 4.5);
+            assert!(contrast(colors.on_warning_container, colors.surface_container_high) >= 4.5);
+            assert!(contrast(colors.error, colors.surface) >= 4.5);
+            assert!(contrast(colors.tertiary, colors.surface) >= 4.5);
             assert!(contrast(colors.outline, colors.surface) >= 3.0);
             assert!(contrast(colors.inverse_on_surface, colors.inverse_surface) >= 4.5);
         }
