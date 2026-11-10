@@ -2875,6 +2875,63 @@ mod tests {
     }
 
     #[test]
+    fn expressive_slider_uses_semantic_track_fill_and_thumb_inks() {
+        for dark in [false, true] {
+            let t = Theme::expressive(240, 120, 1.0, dark);
+            let (x, top, w, value) = (30.0, 40.0, 160.0, 0.5);
+            let h = t.m.slider_h;
+            let fw = (w * value).max(h);
+            let knob_x = x + fw - h / 2.0;
+            let mut c = Canvas::new(240, 120);
+            c.clear(t.pal.bg);
+            slider(&mut c, &t, x, top, w, value);
+            let at = |px: f32, py: f32| {
+                let i = ((py as usize * c.w as usize) + px as usize) * 4;
+                c.data[i..i + 4].try_into().unwrap()
+            };
+            assert_eq!(
+                at(knob_x, top + h / 2.0),
+                [t.pal.on_accent.r, t.pal.on_accent.g, t.pal.on_accent.b, t.pal.on_accent.a],
+                "the thumb ink follows on-primary in {} mode",
+                if dark { "dark" } else { "light" }
+            );
+            assert_eq!(
+                at(x + w - 3.0, top + h / 2.0),
+                [t.pal.track.r, t.pal.track.g, t.pal.track.b, t.pal.track.a],
+                "the unfilled track follows surface-container-high in {} mode",
+                if dark { "dark" } else { "light" }
+            );
+            assert_eq!(
+                at(x + 8.0, top + h / 2.0),
+                [t.pal.accent.r, t.pal.accent.g, t.pal.accent.b, t.pal.accent.a],
+                "the active track follows primary in {} mode",
+                if dark { "dark" } else { "light" }
+            );
+        }
+    }
+
+    #[test]
+    fn stock_slider_keeps_its_original_palette_roles() {
+        for dark in [false, true] {
+            let t = if dark { Theme::dark(240, 120, 1.0) } else { Theme::light(240, 120, 1.0) };
+            let (x, top, w, value) = (30.0, 40.0, 160.0, 0.5);
+            let h = t.m.slider_h;
+            let fw = (w * value).max(h);
+            let knob_x = x + fw - h / 2.0;
+            let mut c = Canvas::new(240, 120);
+            c.clear(t.pal.bg);
+            slider(&mut c, &t, x, top, w, value);
+            let at = |px: f32, py: f32| {
+                let i = ((py as usize * c.w as usize) + px as usize) * 4;
+                c.data[i..i + 4].try_into().unwrap()
+            };
+            assert_eq!(at(knob_x, top + h / 2.0), [t.pal.on_accent.r, t.pal.on_accent.g, t.pal.on_accent.b, t.pal.on_accent.a]);
+            assert_eq!(at(x + w - 3.0, top + h / 2.0), [t.pal.track.r, t.pal.track.g, t.pal.track.b, t.pal.track.a]);
+            assert_eq!(at(x + 8.0, top + h / 2.0), [t.pal.accent.r, t.pal.accent.g, t.pal.accent.b, t.pal.accent.a]);
+        }
+    }
+
+    #[test]
     fn theme_picker_draws_four_separate_preview_targets() {
         let t = Theme::light(720, 1600, 2.0);
         let f = crate::font::bundled();
