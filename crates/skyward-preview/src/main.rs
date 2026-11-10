@@ -1031,6 +1031,12 @@ fn main() -> Result<()> {
             || screen == Screen::Wipe
             || screen == Screen::RestoreBackup
             || screen == Screen::Clash
+            || screen == Screen::Installing
+            || screen == Screen::Backup
+            || screen == Screen::Restore
+            || screen == Screen::BackupJob
+            || screen == Screen::Update
+            || screen == Screen::SkywardUpdate
             || matches!(screen, Screen::Choose(_))
         {
             &[false, true]
