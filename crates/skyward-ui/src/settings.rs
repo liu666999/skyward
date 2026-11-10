@@ -307,6 +307,7 @@ mod tests {
             lang: Lang::En,
             language_chosen: true,
             dark: true,
+            expressive: true,
             brightness: 0.7,
             screen_off: 6,
             time_zone: 7,
@@ -331,6 +332,23 @@ mod tests {
     }
 
     #[test]
+    fn the_expressive_theme_choice_round_trips_and_old_files_default_to_stock() {
+        let mut state = State::default();
+        state.expressive = true;
+        let text = Settings::of(&state).text();
+        let loaded = Settings::read(&text).unwrap();
+        let mut restored = State::default();
+        loaded.apply(&mut restored);
+        assert!(restored.expressive);
+
+        let old = Settings::read(r#"{ "dark": true }"#).unwrap();
+        let mut legacy = State::default();
+        old.apply(&mut legacy);
+        assert!(legacy.dark);
+        assert!(!legacy.expressive);
+    }
+
+    #[test]
     fn each_value_is_kept_as_what_it_means() {
         let state = State { screen_off: 3, time_zone: 1, backup: [true, false, false, true], ..State::default() };
         let text = Settings::of(&state).text();
@@ -351,6 +369,7 @@ mod tests {
         let mut state = State::default();
         kept.apply(&mut state);
         assert!(state.dark && state.compress);
+        assert!(!state.expressive, "old settings without the theme field keep the stock palette");
         assert_eq!(Settings::of(&state), Settings { dark: true, backup: Backup { compress: true, ..Backup::default() }, ..Settings::default() });
         assert!(!state.language_chosen);
         assert!(Settings::read("dark = true").is_err(), "not JSON");
