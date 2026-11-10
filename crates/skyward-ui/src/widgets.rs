@@ -1566,6 +1566,11 @@ const TICK_RIGHT: f32 = 31.0;
 const TICK_STROKE: f32 = 2.0;
 const CHOICES_SHADOW: f32 = 10.7;
 
+/// Radius of the choice popup, expressed in physical pixels.
+fn choices_radius(t: &Theme) -> f32 {
+    t.m.dp(t.shapes.extra_large + 4.0)
+}
+
 /// A list of choices open over the page from `row`, as the stock one
 /// opens: a card lifted off the page, its choices one under another, the
 /// one `chosen` in the accent with a tick, and the one `held` darkened
@@ -1573,9 +1578,7 @@ const CHOICES_SHADOW: f32 = 10.7;
 #[allow(clippy::too_many_arguments)]
 pub fn choices(c: &mut Canvas, t: &Theme, f: &Fonts, row: Rect, names: &[&str], chosen: Option<usize>, held: Option<usize>) -> Vec<Rect> {
     let m = &t.m;
-    // Keep the stock popup's 24 dp corners; the expressive scale lifts it
-    // into the larger M3E extra-large family without changing its hitbox.
-    let (w, item, pad, r) = (m.dp(CHOICES_W), m.dp(CHOICE_H), m.dp(CHOICES_PAD), m.dp(t.shapes.extra_large + 4.0));
+    let (w, item, pad, r) = (m.dp(CHOICES_W), m.dp(CHOICE_H), m.dp(CHOICES_PAD), choices_radius(t));
     let (x, y) = (row.x + row.w - m.dp(CHOICES_RIGHT) - w, row.y + m.dp(CHOICES_DROP));
     let h = pad * 2.0 + item * names.len() as f32;
     let rects: Vec<Rect> = (0..names.len()).map(|i| Rect::new(x, y + pad + item * i as f32, w, item)).collect();
@@ -2995,6 +2998,9 @@ mod tests {
         // 621 to 797, the arrows after its value 1086..1116 by 685..731,
         // and its list 256..1114 from 666, the tick 1003..1040 by 741..771.
         let t = Theme::light(1200, 2608, 3.0);
+        let expressive = Theme::expressive(1200, 2608, 3.0, false);
+        assert_eq!(choices_radius(&t), t.m.dp(24.0), "stock popup keeps its original radius");
+        assert_eq!(choices_radius(&expressive), expressive.m.dp(32.0), "M3E popup uses its larger shape role");
         let f = crate::font::bundled();
         let mut c = Canvas::filled(1200, 2608, t.pal.bg);
         let rows = list(&mut c, &t, &f, 621.0, &[Row::new("安全性").trail(Trail::Choice("无"))]);
