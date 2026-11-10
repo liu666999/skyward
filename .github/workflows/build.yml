@@ -77,6 +77,13 @@ jobs:
           # Permissions, mount failures, Wi-Fi and filesystem operations use
           # the same semantic surfaces and must remain readable in M3E.
           test -s target/theme-preview/52-file-permissions-dark-m3e.png
+          # Editable text, rename and password-entry states use the shared M3E field palette.
+          test -s target/theme-preview/124-editor-light-m3e.png
+          test -s target/theme-preview/125-editor-dark-symbols-m3e.png
+          test -s target/theme-preview/126-editor-changed-light-m3e.png
+          test -s target/theme-preview/79-rename-light-m3e.png
+          test -s target/theme-preview/155-wlan-add-light-password-m3e.png
+          test -s target/theme-preview/157-wlan-add-dark-choosing-m3e.png
           test -s target/theme-preview/15-mount-light-m3e.png
           test -s target/theme-preview/16-mount-dark-unmount-failed-m3e.png
           test -s target/theme-preview/134-wlan-light-nearby-m3e.png
