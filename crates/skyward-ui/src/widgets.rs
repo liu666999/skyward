@@ -2281,7 +2281,7 @@ pub fn spec_card(c: &mut Canvas, t: &Theme, f: &Fonts, top: f32, title: &str, it
     let caption_px = m.dp(type_scale.map_or(11.0, |scale| scale.label_small.size_sp));
     let lines: Vec<String> = title.split('\n').flat_map(|l| wrap(c, &f.heading, l, title_px, room)).collect();
     let first_title = top + m.dp(23.0) + f.heading.cap(title_px);
-    let title_pitch = m.dp(33.0);
+    let title_pitch = m.dp(t.typography.map_or(33.0, |scale| scale.headline_small.line_height_sp));
     let first = first_title + title_pitch * lines.len().saturating_sub(1) as f32 + m.dp(39.4);
     let (pitch, drop) = (m.dp(45.7), m.dp(15.5));
     let last_caption = first + pitch * items.len().saturating_sub(1) as f32 + drop;
