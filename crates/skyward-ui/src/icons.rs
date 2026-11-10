@@ -628,6 +628,13 @@ mod tests {
     }
 
     #[test]
+    fn unclassified_tile_colours_keep_the_supplied_fallback() {
+        let t = Theme::expressive(1200, 2608, 3.0, false);
+        let source = Rgba::rgb(12, 34, 56);
+        assert_eq!(tile_inks(&t, source), (source, Rgba::rgb(255, 255, 255)));
+    }
+
+    #[test]
     fn stock_tiles_keep_their_original_colour_and_white_glyph() {
         let t = Theme::light(1200, 2608, 3.0);
         let source = Rgba::rgb(0x34, 0x82, 0xff);
