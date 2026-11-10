@@ -559,6 +559,8 @@ pub enum Switch {
     Wlan,
     /// Show the password typed rather than a dot for each character.
     ShowPassword,
+    /// Enable the optional Liquid Glass material on the home device card.
+    LiquidGlass,
 }
 
 /// What a backup can take, in the order the backup page lists it.
@@ -1584,6 +1586,8 @@ pub struct State {
     pub dark: bool,
     /// Whether the Material 3 Expressive palette is selected instead of stock.
     pub expressive: bool,
+    /// Whether the Liquid Glass material is enabled on the home device card.
+    pub liquid_glass: bool,
     pub brightness: f32,
     /// How long the screen stays on with nothing touched, by its place in
     /// [`SCREEN_OFF`].
@@ -1762,6 +1766,7 @@ impl Default for State {
             language_chosen: false,
             dark: false,
             expressive: false,
+            liquid_glass: false,
             brightness: SLIDER_START,
             // Two minutes.
             screen_off: 3,
@@ -2808,13 +2813,15 @@ impl App {
     }
 
     pub fn theme(&self) -> Theme {
-        if self.state.expressive {
+        let mut theme = if self.state.expressive {
             Theme::expressive(self.w, self.h, self.px_per_dp, self.state.dark)
         } else if self.state.dark {
             Theme::dark(self.w, self.h, self.px_per_dp)
         } else {
             Theme::light(self.w, self.h, self.px_per_dp)
-        }
+        };
+        theme.liquid_glass = self.state.liquid_glass;
+        theme
     }
 
     pub fn screen(&self) -> Screen {
@@ -5190,6 +5197,7 @@ impl App {
                     Switch::Signature => &mut self.state.check_signature,
                     Switch::KeepRecovery => &mut self.state.keep_recovery,
                     Switch::ShowPassword => &mut self.state.show_password,
+                    Switch::LiquidGlass => &mut self.state.liquid_glass,
                     Switch::Wlan => unreachable!("the WLAN switch is turned above"),
                 };
                 *on = !*on;
