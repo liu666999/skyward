@@ -1472,7 +1472,9 @@ mod tests {
             let i = (y * c.w as usize + x) * 4;
             [c.data[i], c.data[i + 1], c.data[i + 2], c.data[i + 3]]
         };
-        assert_ne!(pixel(&target, 11, 11), pixel(&backdrop, 11, 11), "the panel interior receives backdrop blur");
+        let blurred_center = pixel(&target, 11, 11);
+        assert_ne!(blurred_center, pixel(&backdrop, 11, 11), "the panel interior receives backdrop blur");
+        assert!((100..=140).contains(&blurred_center[0]), "checkerboard average should be softened, got {}", blurred_center[0]);
         assert_eq!(pixel(&target, 0, 0), pixel(&backdrop, 0, 0), "pixels outside the panel remain unchanged");
         assert_eq!(pixel(&target, 5, 5), pixel(&backdrop, 5, 5), "the rounded corner remains clipped");
     }
