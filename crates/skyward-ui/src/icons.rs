@@ -380,8 +380,6 @@ pub fn glyph(c: &mut Canvas, icon: Icon, cx: f32, cy: f32, size: f32, ink: Rgba)
     draw(c, Art::Glyph(icon), cx, cy, size, ink);
 }
 
-/// Draw `icon` as a row shows it: its tile in `color`, the tile's top-left
-/// corner at (`x`, `y`), and its glyph in white over it.
 /// Translate the stock Settings icon-tile colours into Material 3 roles.
 /// The stock palette is intentionally passed in by pages.rs and remains
 /// untouched for the original themes.
@@ -605,12 +603,12 @@ mod tests {
     #[test]
     fn material3_tiles_use_container_roles_and_matching_foregrounds_in_both_modes() {
         let stock = [
-            (Rgba::rgb(0x34, 0x82, 0xff), "primary"),
-            (Rgba::rgb(0x1d, 0xcd, 0x3a), "tertiary"),
-            (Rgba::rgb(0x77, 0x67, 0xf9), "secondary"),
-            (Rgba::rgb(0x8c, 0x9d, 0xb0), "surface"),
-            (Rgba::rgb(0xff, 0x69, 0x00), "secondary-solid"),
-            (Rgba::rgb(0xfa, 0x38, 0x2e), "error"),
+            Rgba::rgb(0x34, 0x82, 0xff),
+            Rgba::rgb(0x1d, 0xcd, 0x3a),
+            Rgba::rgb(0x77, 0x67, 0xf9),
+            Rgba::rgb(0x8c, 0x9d, 0xb0),
+            Rgba::rgb(0xff, 0x69, 0x00),
+            Rgba::rgb(0xfa, 0x38, 0x2e),
         ];
         for dark in [false, true] {
             let t = Theme::expressive(1200, 2608, 3.0, dark);
@@ -623,7 +621,7 @@ mod tests {
                 (c.secondary, c.on_secondary),
                 (c.error_container, c.on_error_container),
             ];
-            for ((source, _), roles) in stock.into_iter().zip(expected) {
+            for (source, roles) in stock.into_iter().zip(expected) {
                 assert_eq!(tile_inks(&t, source), roles);
             }
         }
