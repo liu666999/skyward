@@ -62,7 +62,22 @@ struct Palette {
 }
 
 fn palette(t: &Theme) -> Palette {
-    if t.dark {
+    if t.typography.is_some() {
+        // File navigation follows the active M3 surface roles just like the
+        // rest of the UI. Keep file-type artwork itself unchanged.
+        Palette {
+            page: t.pal.bg,
+            name: t.pal.text,
+            line: t.pal.subtitle,
+            note: t.pal.subtitle,
+            chevron: t.pal.chevron,
+            pill: t.pal.search,
+            pill_text: t.pal.subtitle,
+            here: t.pal.badge,
+            here_text: t.pal.avatar_glyph,
+            arrow: t.pal.outline,
+        }
+    } else if t.dark {
         Palette {
             page: Rgba::rgb(0, 0, 0),
             name: Rgba::rgb(242, 242, 242),
@@ -489,6 +504,38 @@ pub fn note(c: &mut Canvas, t: &Theme, f: &Fonts, title: &str, why: Option<&str>
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn m3_file_navigation_uses_semantic_surface_and_content_roles() {
+        for dark in [false, true] {
+            let t = Theme::expressive(1440, 3200, 3.5, dark);
+            let p = palette(&t);
+            assert_eq!(p.page, t.pal.bg);
+            assert_eq!(p.name, t.pal.text);
+            assert_eq!(p.line, t.pal.subtitle);
+            assert_eq!(p.note, t.pal.subtitle);
+            assert_eq!(p.chevron, t.pal.chevron);
+            assert_eq!(p.pill, t.pal.search);
+            assert_eq!(p.pill_text, t.pal.subtitle);
+            assert_eq!(p.here, t.pal.badge);
+            assert_eq!(p.here_text, t.pal.avatar_glyph);
+            assert_eq!(p.arrow, t.pal.outline);
+        }
+    }
+
+    #[test]
+    fn stock_file_navigation_keeps_its_original_light_and_dark_palette() {
+        let light = palette(&Theme::light(1440, 3200, 3.5));
+        assert_eq!(light.page, Rgba::rgb(255, 255, 255));
+        assert_eq!(light.name, Rgba::rgb(0, 0, 0));
+        assert_eq!(light.pill, Rgba::rgb(243, 244, 247));
+        assert_eq!(light.here, Rgba::rgb(255, 245, 217));
+        let dark = palette(&Theme::dark(1440, 3200, 3.5));
+        assert_eq!(dark.page, Rgba::rgb(0, 0, 0));
+        assert_eq!(dark.name, Rgba::rgb(242, 242, 242));
+        assert_eq!(dark.pill, Rgba::rgb(38, 38, 38));
+        assert_eq!(dark.here, Rgba::rgb(51, 37, 0));
+    }
 
     #[test]
     fn a_long_name_keeps_its_start_and_its_extension() {
