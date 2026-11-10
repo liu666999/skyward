@@ -310,6 +310,8 @@ mod tests {
             assert!(contrast(colors.on_surface, colors.surface_container_highest) >= 4.5);
             assert!(contrast(colors.on_primary, colors.primary) >= 4.5);
             assert!(contrast(colors.on_primary_container, colors.primary_container) >= 4.5);
+            // Selected popup text uses primary over the high surface container.
+            assert!(contrast(colors.primary, colors.surface_container_high) >= 4.5);
             assert!(contrast(colors.on_error, colors.error) >= 4.5);
             assert!(contrast(colors.on_surface_variant, colors.surface_container) >= 4.5);
             assert!(contrast(colors.on_surface_variant, colors.surface_container_high) >= 4.5);
