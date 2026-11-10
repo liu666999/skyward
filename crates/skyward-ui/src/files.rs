@@ -304,8 +304,8 @@ fn folder_icon(c: &mut Canvas, x: f32, y: f32, size: f32) {
 }
 
 /// A file 40 units square scaled to `size`: a sheet with its top right
-/// corner folded down, in the colour of what the file holds, and a sign of
-/// that in white; `page` is the colour around it.
+/// corner folded down, in the colour of what the file holds, and a sign in
+/// the matching foreground role; `page` is the colour around it.
 fn file_icon(c: &mut Canvas, t: &Theme, f: &Fonts, x: f32, y: f32, size: f32, page: Rgba, kind: FileType) {
     let u = size / 40.0;
     let at = |v: f32, w: f32| (x + v * u, y + w * u);
@@ -325,9 +325,8 @@ fn file_icon(c: &mut Canvas, t: &Theme, f: &Fonts, x: f32, y: f32, size: f32, pa
 
 const WHITE: Rgba = Rgba::rgb(255, 255, 255);
 
-/// The white sign of what a file holds, on its sheet at (`x`, `y`) in
-/// units of `u` pixels; `sheet` is the sheet's colour, for what is cut out
-/// of the sign.
+/// The sign of what a file holds, on its sheet at (`x`, `y`) in units of
+/// `u` pixels; `sheet` is the sheet's colour, for what is cut out of the sign.
 fn sign(c: &mut Canvas, f: &Fonts, kind: FileType, x: f32, y: f32, u: f32, sheet: Rgba, ink: Rgba) {
     let at = |v: f32, w: f32| (x + v * u, y + w * u);
     let line = |c: &mut Canvas, a: (f32, f32), b: (f32, f32), t: f32, color: Rgba| {
@@ -519,7 +518,6 @@ mod tests {
     use super::*;
 
     #[test]
-    #[test]
     fn m3_file_type_sheets_use_matching_semantic_container_inks() {
         for dark in [false, true] {
             let t = Theme::expressive(1440, 3200, 3.5, dark);
@@ -540,6 +538,7 @@ mod tests {
         assert_eq!(sheet(FileType::Audio, &t), (Rgba::rgb(230, 75, 59), WHITE));
     }
 
+    #[test]
     fn m3_file_navigation_uses_semantic_surface_and_content_roles() {
         for dark in [false, true] {
             let t = Theme::expressive(1440, 3200, 3.5, dark);
