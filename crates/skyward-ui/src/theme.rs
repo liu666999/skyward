@@ -401,3 +401,24 @@ const DARK_HERO: Hero = Hero {
     value: Rgba::rgb(157, 161, 188),
     chevron: Rgba::rgb(118, 122, 160),
 };
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn expressive_palette_maps_semantic_roles_and_keeps_device_geometry() {
+        let stock = Theme::light(1200, 2608, 3.0);
+        let expressive = Theme::expressive(1200, 2608, 3.0, false);
+        let roles = ColorScheme::light();
+        assert_eq!(expressive.pal.bg, roles.background);
+        assert_eq!(expressive.pal.accent, roles.primary);
+        assert_eq!(expressive.pal.danger, roles.error);
+        assert_eq!(expressive.pal.avatar_glyph, roles.on_primary_container);
+        assert_eq!((expressive.m.w, expressive.m.h), (stock.m.w, stock.m.h));
+        assert!(expressive.m.card_radius > stock.m.card_radius);
+        let dark = Theme::expressive(1200, 2608, 3.0, true);
+        assert!(dark.dark);
+        assert_eq!(dark.pal.bg, ColorScheme::dark().background);
+    }
+}
