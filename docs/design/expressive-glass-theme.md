@@ -121,3 +121,8 @@ The canvas exposes additive spaced-text measurement and drawing methods. Existin
 ### Expressive section and row-tag typography
 
 Page section captions use the M3 Expressive label-medium letter spacing. Inline row tags use label-small spacing for both their measured width and rendered glyph advances, so the tag's horizontal placement remains consistent. Both additions are opt-in through the expressive type scale; stock spacing remains zero and card geometry and hit targets are unchanged.
+
+
+### Expressive row text wrapping
+
+Row subtitle wrapping now measures with the same M3 Expressive body-medium letter spacing used for drawing. Row titles use title-medium spacing for both truncation and tag placement. The stock theme passes zero additional spacing through the same helper, preserving its previous line-break behavior. Punctuation and Latin-word wrapping rules remain shared.
