@@ -311,6 +311,14 @@ mod tests {
             assert!(contrast(colors.on_primary, colors.primary) >= 4.5);
             assert!(contrast(colors.on_primary_container, colors.primary_container) >= 4.5);
             assert!(contrast(colors.on_error, colors.error) >= 4.5);
+            assert!(contrast(colors.on_surface_variant, colors.surface_container) >= 4.5);
+            assert!(contrast(colors.on_secondary, colors.secondary) >= 4.5);
+            assert!(contrast(colors.on_secondary_container, colors.secondary_container) >= 4.5);
+            assert!(contrast(colors.on_tertiary, colors.tertiary) >= 4.5);
+            assert!(contrast(colors.on_tertiary_container, colors.tertiary_container) >= 4.5);
+            assert!(contrast(colors.on_error_container, colors.error_container) >= 4.5);
+            assert!(contrast(colors.outline, colors.surface) >= 3.0);
+            assert!(contrast(colors.inverse_on_surface, colors.inverse_surface) >= 4.5);
         }
     }
 
