@@ -1027,9 +1027,9 @@ fn main() -> Result<()> {
         }),
     ];
     for (name, screen, dark, set) in pages {
-        // Focused M3E previews cover search and file navigation, destructive
-        // actions, install outcomes, backup/restore jobs and update states.
-        // Stock previews remain generated for every fixture.
+        // Focused M3E previews cover search and file navigation, permissions,
+        // Wi-Fi, filesystem operations, destructive actions, install outcomes,
+        // backup/restore jobs and update states. Stock fixtures remain intact.
         let expressive_variants: &[bool] = if screen == Screen::Search
             || screen == Screen::Files
             || screen == Screen::Permissions
