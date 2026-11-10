@@ -134,12 +134,24 @@ const NO_LINE_START: &str = "，。、；：！？）」』》%,.;:!?)]>”";
 const NO_LINE_END: &str = "（「『《([<“";
 
 pub(crate) fn wrap(c: &Canvas, face: &Face, text: &str, px: f32, max_w: f32) -> Vec<String> {
+    wrap_spaced(c, face, text, px, max_w, 0.0)
+}
+
+/// Wrap text using the same additive glyph spacing used by the renderer.
+pub(crate) fn wrap_spaced(
+    c: &Canvas,
+    face: &Face,
+    text: &str,
+    px: f32,
+    max_w: f32,
+    spacing: f32,
+) -> Vec<String> {
     let mut lines = Vec::new();
     let mut line = String::new();
     for ch in text.chars() {
         let mut probe = line.clone();
         probe.push(ch);
-        if !line.is_empty() && c.text_width(face, &probe, px) > max_w {
+        if !line.is_empty() && c.text_width_spaced(face, &probe, px, spacing) > max_w {
             if NO_LINE_START.contains(ch) {
                 line.push(ch);
                 continue;
@@ -1425,7 +1437,8 @@ fn layout(c: &Canvas, t: &Theme, f: &Fonts, r: &Row) -> Layout {
         Trail::Choice(s) => m.dp(UPDOWN_RIGHT + UPDOWN_W + UPDOWN_VALUE_GAP) + m.value_gap + c.text_width(&f.value, s, m.sub_px),
     };
     let text_max = card_w - text_x - trail_w;
-    let sub_lines = r.sub.map(|s| wrap(c, &f.body, s, m.sub_px, text_max)).unwrap_or_default();
+    let body_spacing = m.dp(t.typography.map_or(0.0, |scale| scale.body_medium.letter_spacing_sp));
+    let sub_lines = r.sub.map(|s| wrap_spaced(c, &f.body, s, m.sub_px, text_max, body_spacing)).unwrap_or_default();
     let h = if sub_lines.is_empty() {
         if r.fan.is_some() {
             m.dp(FAN_ROW_H)
@@ -1459,24 +1472,27 @@ fn draw_row(c: &mut Canvas, t: &Theme, f: &Fonts, r: &Row, lay: &Layout, top: f3
     let tag_w = r.tag.map_or(0.0, |tag| c.text_width_spaced(&f.body, tag, m.dp(TAG_PX), tag_spacing) + m.dp(TAG_PAD * 2.0 + TAG_GAP));
     let title_room = (lay.text_max - tag_w).max(0.0);
     let title_max = Some(title_room);
+    let title_spacing = m.dp(t.typography.map_or(0.0, |scale| scale.title_medium.letter_spacing_sp));
+    let body_spacing = m.dp(t.typography.map_or(0.0, |scale| scale.body_medium.letter_spacing_sp));
     let (tt, tb) = f.heading.ink(m.row_title_px);
     let title_cy = if lay.sub_lines.is_empty() {
-        c.text_vc(&f.heading, r.title, tx, cy, m.row_title_px, color, title_max);
+        c.text_spaced(&f.heading, r.title, tx, cy - (tt + tb) / 2.0, m.row_title_px, color, title_max, title_spacing);
         cy
     } else {
         let (st, sb) = f.body.ink(m.sub_px);
         let block = (tb - tt) + m.sub_gap + (lay.sub_lines.len() as f32 - 1.0) * m.sub_pitch + (sb - st);
         let ink_top = cy - block / 2.0;
-        c.text_top(&f.heading, r.title, tx, ink_top, m.row_title_px, color, title_max);
+        c.text_spaced(&f.heading, r.title, tx, ink_top - tt, m.row_title_px, color, title_max, title_spacing);
         let mut st_top = ink_top + (tb - tt) + m.sub_gap;
+        let (line_top, _) = f.body.ink(m.sub_px);
         for line in &lay.sub_lines {
-            c.text_top(&f.body, line, tx, st_top, m.sub_px, tone.sub, None);
+            c.text_spaced(&f.body, line, tx, st_top - line_top, m.sub_px, tone.sub, None, body_spacing);
             st_top += m.sub_pitch;
         }
         ink_top + (tb - tt) / 2.0
     };
     if let Some(tag) = r.tag {
-        let title_w = c.text_width(&f.heading, r.title, m.row_title_px).min(title_room);
+        let title_w = c.text_width_spaced(&f.heading, r.title, m.row_title_px, title_spacing).min(title_room);
         let x = tx + title_w + m.dp(TAG_GAP);
         let w = c.text_width_spaced(&f.body, tag, m.dp(TAG_PX), tag_spacing) + m.dp(TAG_PAD * 2.0);
         let h = m.dp(TAG_H);
@@ -3122,6 +3138,21 @@ mod tests {
         assert!(holes(&battery(&t, &f, 100, false, right, cy)) > 60, "the digits show the page through");
         assert_eq!(holes(&battery(&t, &f, 100, true, right, cy)), 0, "white digits over green");
         assert_eq!(holes(&battery(&t, &f, 15, false, right, cy)), 0, "white digits over red");
+    }
+
+    #[test]
+    fn spaced_wrapping_respects_rendered_glyph_advances() {
+        let f = crate::font::bundled();
+        let c = Canvas::new(1, 1);
+        let px = 18.0;
+        let text = "M3 expressive";
+        let plain = wrap(&c, &f.body, text, px, 85.0);
+        let spaced = wrap_spaced(&c, &f.body, text, px, 85.0, 0.5);
+        assert!(spaced.len() >= plain.len());
+        for line in &spaced {
+            assert!(c.text_width_spaced(&f.body, line, px, 0.5) <= 85.0 || line.chars().count() == 1);
+        }
+        assert_eq!(spaced.concat(), text);
     }
 
     #[test]
