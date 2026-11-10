@@ -1477,7 +1477,7 @@ fn draw_row(c: &mut Canvas, t: &Theme, f: &Fonts, r: &Row, lay: &Layout, top: f3
         let x = tx + title_w + m.dp(TAG_GAP);
         let w = c.text_width(&f.body, tag, m.dp(TAG_PX)) + m.dp(TAG_PAD * 2.0);
         let h = m.dp(TAG_H);
-        let (stroke, radius) = (m.dp(TAG_STROKE), m.dp(TAG_RADIUS));
+        let (stroke, radius) = (m.dp(TAG_STROKE), m.dp(t.shapes.extra_small * 0.875));
         c.fill_round_rect(x, title_cy - h / 2.0, w, h, radius, tone.value);
         c.fill_round_rect(x + stroke, title_cy - h / 2.0 + stroke, w - stroke * 2.0, h - stroke * 2.0, radius - stroke, tone.card);
         c.text_center(&f.body, tag, x + w / 2.0, title_cy, m.dp(TAG_PX), tone.value);
