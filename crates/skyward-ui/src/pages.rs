@@ -990,6 +990,18 @@ fn percent(share: f32) -> u32 {
     (share * 100.0).floor() as u32
 }
 
+/// Map the stock status swatches onto M3E semantic roles. The stock
+/// palette is returned unchanged; status meaning is retained in both schemes.
+fn status_ink(t: &Theme, stock: Rgba) -> Rgba {
+    if t.typography.is_none() { return stock; }
+    if stock == GREEN { t.pal.badge_ink }
+    else if stock == RED { t.pal.danger }
+    else if stock == ORANGE { t.pal.warning_ink }
+    else if stock == BLUE { t.pal.accent }
+    else if stock == PURPLE { t.pal.outline }
+    else { t.pal.subtitle }
+}
+
 /// Where an update stands, and the share of its step done when known.
 fn update_stage(l: Lang, stage: Option<&Stage>) -> (String, Option<f32>) {
     match stage {
@@ -2107,15 +2119,15 @@ pub fn backup_job(cx: &Ctx) -> Frame {
                         Place::Storage => tr!(l, "已保存到内部存储的 Skyward/backups/{name}", "已儲存到內部儲存空間的 Skyward/backups/{name}", "Saved to Skyward/backups/{name} in internal storage"),
                         Place::UsbDrive => tr!(l, "已保存到 U 盘的 Skyward/backups/{name}", "已儲存到 USB 隨身碟的 Skyward/backups/{name}", "Saved to Skyward/backups/{name} on the USB drive"),
                     };
-                    (l.pick(BACKUP_COMPLETE), GREEN, saved)
+                    (l.pick(BACKUP_COMPLETE), status_ink(t, GREEN), saved)
                 }
                 BackupEnd::Restored { .. } => {
-                    (l.pick(RESTORE_COMPLETE), GREEN, l.pick(["重启手机后，将使用恢复的内容。", "重新啟動手機後，將使用還原的內容。", "The phone uses what was restored once it reboots."]).to_string())
+                    (l.pick(RESTORE_COMPLETE), status_ink(t, GREEN), l.pick(["重启手机后，将使用恢复的内容。", "重新啟動手機後，將使用還原的內容。", "The phone uses what was restored once it reboots."]).to_string())
                 }
-                BackupEnd::Stopped => (l.pick(["已停止", "已停止", "Stopped"]), SLATE, gone.to_string()),
+                BackupEnd::Stopped => (l.pick(["已停止", "已停止", "Stopped"]), status_ink(t, SLATE), gone.to_string()),
                 BackupEnd::Refused(r) => {
                     let title = l.pick(if job.restore { ["无法恢复", "無法還原", "Can't restore"] } else { ["无法备份", "無法備份", "Can't back up"] });
-                    (title, ORANGE, fmt::backup_refusal(l, r, job.restore))
+                    (title, status_ink(t, ORANGE), fmt::backup_refusal(l, r, job.restore))
                 }
                 BackupEnd::Failed(_) if job.restore && writing => {
                     let detail = l.pick([
@@ -2123,9 +2135,9 @@ pub fn backup_job(cx: &Ctx) -> Frame {
                         "部分內容已寫入，重新啟動後可能無法正常啟動。請重新還原，完成後再重新啟動。",
                         "Part of it was written, so the phone may not start properly after a reboot. Restore again, and reboot once it's done.",
                     ]);
-                    (failed, RED, detail.to_string())
+                    (failed, status_ink(t, RED), detail.to_string())
                 }
-                BackupEnd::Failed(_) => (failed, RED, gone.to_string()),
+                BackupEnd::Failed(_) => (failed, status_ink(t, RED), gone.to_string()),
             };
             widgets::list(&mut c, t, f, top, &[standing(title, color, icon, &detail)]).bottom
         }
@@ -2586,10 +2598,10 @@ pub fn update(cx: &Ctx) -> Frame {
     };
     let (title, detail) = fmt::update(l, &s.update, next);
     let color = match s.update {
-        Standing::None => SLATE,
-        Standing::Merged => GREEN,
-        Standing::Failed(_) | Standing::Unknown => RED,
-        _ => ORANGE,
+        Standing::None => status_ink(t, SLATE),
+        Standing::Merged => status_ink(t, GREEN),
+        Standing::Failed(_) | Standing::Unknown => status_ink(t, RED),
+        _ => status_ink(t, ORANGE),
     };
     let mut row = Row::new(title).icon(color, Icon::Layers).trail(Trail::None);
     if let Some(detail) = &detail {
@@ -4020,6 +4032,26 @@ mod tests {
 
     fn at(item: usize, done: u64, of: u64, checking: bool) -> BackupAt {
         BackupAt { item, done, of, checking }
+    }
+
+    #[test]
+    fn status_inks_keep_stock_and_use_m3_semantic_roles() {
+        let light = Theme::expressive(1440, 3200, 3.5, false);
+        let dark = Theme::expressive(1440, 3200, 3.5, true);
+        for t in [&light, &dark] {
+            assert_eq!(status_ink(t, GREEN), t.pal.badge_ink);
+            assert_eq!(status_ink(t, RED), t.pal.danger);
+            assert_eq!(status_ink(t, ORANGE), t.pal.warning_ink);
+            assert_eq!(status_ink(t, SLATE), t.pal.subtitle);
+        }
+        let stock_light = Theme::light(1440, 3200, 3.5);
+        let stock_dark = Theme::dark(1440, 3200, 3.5);
+        for t in [&stock_light, &stock_dark] {
+            assert_eq!(status_ink(t, GREEN), GREEN);
+            assert_eq!(status_ink(t, RED), RED);
+            assert_eq!(status_ink(t, ORANGE), ORANGE);
+            assert_eq!(status_ink(t, SLATE), SLATE);
+        }
     }
 
     #[test]
